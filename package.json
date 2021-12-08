@@ -1,0 +1,14 @@
+{
+    "name": "com.phenomenalviborg.mucosdk",
+    "version": "0.4.7",
+    "displayName": "MUCOSDK",
+    "unity": "",
+    "unityRelease": "",
+    "documentationUrl": "",
+    "changelogUrl": "",
+    "licensesUrl": "",
+    "keywords": ["Phenomenal", "MUCO"],
+    "author": {
+        "name": "Storm Søndergaard"
+    }
+}
