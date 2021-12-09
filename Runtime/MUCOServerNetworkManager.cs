@@ -39,30 +39,41 @@ namespace PhenomenalViborg.MUCOSDK
         {
             Debug.Log($"User Connected: {clientInfo}");
 
+            // Tell the new client about the other clients.
+            foreach (int clientID in m_UserObjects.Keys)
             {
                 MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-                packet.WriteInt(clientInfo.UniqueIdentifier);
-                Server.SendPacketToAll(packet);
+                packet.WriteInt(clientID);
+                Server.SendPacket(clientInfo, packet);
             }
 
-            foreach(int olderClientIdentifier in m_UserObjects.Keys)
-            {
-                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-                packet.WriteInt(olderClientIdentifier);
-                Server.SendPacket(Server.ClientInfo[olderClientIdentifier], packet);
-            }
-
+            /*// Create a user object on the server.
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
                 m_UserObjects[clientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
             });
+
+            // Tell the new client about all the other clients.
+            foreach (int otherClientID in m_UserObjects.Keys)
+            {
+                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
+                packet.WriteInt(otherClientID);
+                Server.SendPacket(clientInfo, packet);
+            }
+
+            // Tell the other clients that a new user has connected.
+            {
+                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
+                packet.WriteInt(clientInfo.UniqueIdentifier);
+                Server.SendPacketToAll(packet);
+            }*/
         }
 
         private void OnClientDisconnected(MUCOServer.MUCOClientInfo clientInfo)
         {
             Debug.Log($"User Disconnected: {clientInfo}");
 
-            MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserDisconnected);
+            /*MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserDisconnected);
             packet.WriteInt(clientInfo.UniqueIdentifier);
             Server.SendPacketToAll(packet);
 
@@ -70,7 +81,7 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 Destroy(m_UserObjects[clientInfo.UniqueIdentifier]);
                 m_UserObjects[clientInfo.UniqueIdentifier] = null;
-            });
+            }); */
         }
 
         private static void Log(MUCOLogMessage message)
