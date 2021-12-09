@@ -15,7 +15,7 @@ namespace PhenomenalViborg.MUCOSDK
         [Header("Debug")]
         [SerializeField] private MUCOLogMessage.MUCOLogLevel m_LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
 
-        [Header("This should ")]
+        [Header("This should not stay in this class!")]
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_MUCOUserPrefab = null;
 
@@ -37,7 +37,11 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void OnClientConnected(MUCOServer.MUCOClientInfo clientInfo)
         {
-            Debug.Log($"Client Connected: {clientInfo}");
+            Debug.Log($"User Connected: {clientInfo}");
+
+            MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
+            packet.WriteInt(clientInfo.UniqueIdentifier);
+            Server.SendPacketToAll(packet);
 
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -47,7 +51,11 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void OnClientDisconnected(MUCOServer.MUCOClientInfo clientInfo)
         {
-            Debug.Log($"Client Disconnected: {clientInfo}");
+            Debug.Log($"User Disconnected: {clientInfo}");
+
+            MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserDisconnected);
+            packet.WriteInt(clientInfo.UniqueIdentifier);
+            Server.SendPacketToAll(packet);
 
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {

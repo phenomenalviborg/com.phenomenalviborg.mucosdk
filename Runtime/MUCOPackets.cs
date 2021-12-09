@@ -6,6 +6,8 @@ namespace PhenomenalViborg.MUCOSDK
 {
     public enum MUCOServerPackets : int
     {
+        UserConnected,
+        UserDisconnected
     }
 
     public enum MUCOClientPackets : int
