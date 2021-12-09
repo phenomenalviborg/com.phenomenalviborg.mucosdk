@@ -1,0 +1,11 @@
+{
+	"name": "PhenomenalViborg.MUCOSDK",
+	"allowUnsafeCode": false,
+    "overrideReferences": false,
+    "autoReferenced": true,
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone64",
+        "Android"
+    ]
+}
