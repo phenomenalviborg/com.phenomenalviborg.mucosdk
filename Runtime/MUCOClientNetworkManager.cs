@@ -22,9 +22,8 @@ namespace PhenomenalViborg.MUCOSDK
             MUCOLogger.LogEvent += Log;
 
             Client = new MUCOClient();
-            Server.RegisterPacketHandler((int)MUCOServerPackets.UserConnected, HandleUserConnected);
-            Server.RegisterPacketHandler((int)MUCOServerPackets.UserDisconnected, HandleUserDisconnected);
-
+            Client.RegisterPacketHandler((int)MUCOServerPackets.UserConnected, HandleUserConnected);
+            Client.RegisterPacketHandler((int)MUCOServerPackets.UserDisconnected, HandleUserDisconnected);
             Client.Connect(m_ServerAddress, m_ServerPort);
         }
 
