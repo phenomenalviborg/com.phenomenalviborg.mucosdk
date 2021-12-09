@@ -17,7 +17,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         [Header("This should not stay in this class!")]
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
-        [SerializeField] private GameObject m_MUCOUserPrefab = null;
+        [SerializeField] private GameObject m_UserPrefab = null;
 
         private void Start()
         {
@@ -45,7 +45,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
-                m_UserObjects[clientInfo.UniqueIdentifier] = Instantiate(m_MUCOUserPrefab);
+                m_UserObjects[clientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
             });
         }
 
