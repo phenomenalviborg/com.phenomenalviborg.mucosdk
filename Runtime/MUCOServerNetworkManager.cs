@@ -39,9 +39,18 @@ namespace PhenomenalViborg.MUCOSDK
         {
             Debug.Log($"User Connected: {clientInfo}");
 
-            MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-            packet.WriteInt(clientInfo.UniqueIdentifier);
-            Server.SendPacketToAll(packet);
+            {
+                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
+                packet.WriteInt(clientInfo.UniqueIdentifier);
+                Server.SendPacketToAll(packet);
+            }
+
+            foreach(int olderClientIdentifier in m_UserObjects.Keys)
+            {
+                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
+                packet.WriteInt(olderClientIdentifier);
+                Server.SendPacket(Server.ClientInfo[olderClientIdentifier], packet);
+            }
 
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
