@@ -30,58 +30,74 @@ namespace PhenomenalViborg.MUCOSDK
             Server.OnClientDisconnectedEvent += OnClientDisconnected;
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.SpawnUser);
+                packet.WriteInt(999);
+                Server.SendPacketToAll(packet);
+            }
+        }
+
         private void OnApplicationQuit()
         {
             Server.Stop();
         }
 
-        private void OnClientConnected(MUCOServer.MUCOClientInfo clientInfo)
+        private void OnClientConnected(MUCOServer.MUCOClientInfo newClientInfo)
         {
-            Debug.Log($"User Connected: {clientInfo}");
-
-            // Tell the new client about the other clients.
-            foreach (int clientID in m_UserObjects.Keys)
-            {
-                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-                packet.WriteInt(clientID);
-                Server.SendPacket(clientInfo, packet);
-            }
-
-            /*// Create a user object on the server.
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
-                m_UserObjects[clientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
+                // Create a user object on the server.
+                Debug.Log($"User Connected: {newClientInfo}");
+                m_UserObjects[newClientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
+
+                // Update the newly connected user about all the other users in existance.
+                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                {
+                    if (clientInfo.UniqueIdentifier == newClientInfo.UniqueIdentifier)
+                    {
+                        continue;
+                    }
+
+                    MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.SpawnUser);
+                    packet.WriteInt(clientInfo.UniqueIdentifier);
+                    Server.SendPacket(newClientInfo, packet);
+                }
+
+                // Spawn the new user on all clients (includeing the new client).
+                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                {
+                    MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.SpawnUser);
+                    packet.WriteInt(newClientInfo.UniqueIdentifier);
+                    Server.SendPacket(clientInfo, packet);
+                }
             });
-
-            // Tell the new client about all the other clients.
-            foreach (int otherClientID in m_UserObjects.Keys)
-            {
-                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-                packet.WriteInt(otherClientID);
-                Server.SendPacket(clientInfo, packet);
-            }
-
-            // Tell the other clients that a new user has connected.
-            {
-                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserConnected);
-                packet.WriteInt(clientInfo.UniqueIdentifier);
-                Server.SendPacketToAll(packet);
-            }*/
         }
 
-        private void OnClientDisconnected(MUCOServer.MUCOClientInfo clientInfo)
+        private void OnClientDisconnected(MUCOServer.MUCOClientInfo disconnectingClientInfo)
         {
-            Debug.Log($"User Disconnected: {clientInfo}");
-
-            /*MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.UserDisconnected);
-            packet.WriteInt(clientInfo.UniqueIdentifier);
-            Server.SendPacketToAll(packet);
-
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
-                Destroy(m_UserObjects[clientInfo.UniqueIdentifier]);
-                m_UserObjects[clientInfo.UniqueIdentifier] = null;
-            }); */
+                // Destroy disconnected users game object.
+                Debug.Log($"User Disconnected: {disconnectingClientInfo}");
+                Destroy(m_UserObjects[disconnectingClientInfo.UniqueIdentifier]);
+                m_UserObjects[disconnectingClientInfo.UniqueIdentifier] = null;
+
+                // Remove the disconnecting user on all clients (includeing the new client).
+                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                {
+                    if (clientInfo.UniqueIdentifier == disconnectingClientInfo.UniqueIdentifier)
+                    {
+                        continue;
+                    }
+
+                    MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.RemoveUser);
+                    packet.WriteInt(disconnectingClientInfo.UniqueIdentifier);
+                    Server.SendPacket(clientInfo, packet);
+                }
+            });
         }
 
         private static void Log(MUCOLogMessage message)
