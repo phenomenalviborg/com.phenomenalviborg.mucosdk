@@ -67,7 +67,7 @@ namespace PhenomenalViborg.MUCOSDK
                 m_UserObjects[userID] = Instantiate(m_UserPrefab);
 
                 MUCOUser user = m_UserObjects[userID].GetComponent<MUCOUser>();
-                user.Initialize(userID, false);
+                user.Initialize(userID, userID == Client.UniqueIdentifier);
             });
         }
 
