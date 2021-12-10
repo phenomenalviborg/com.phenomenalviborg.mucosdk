@@ -7,10 +7,14 @@ namespace PhenomenalViborg.MUCOSDK
     public enum MUCOServerPackets : int
     {
         SpawnUser,
-        RemoveUser
+        RemoveUser,
+        TranslateUser,
+        RotateUser
     }
 
     public enum MUCOClientPackets : int
     {
+        TranslateUser,
+        RotateUser
     }
 }

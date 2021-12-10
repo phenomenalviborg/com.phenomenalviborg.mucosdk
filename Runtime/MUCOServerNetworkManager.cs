@@ -7,6 +7,7 @@ namespace PhenomenalViborg.MUCOSDK
 {
     public class MUCOServerNetworkManager : MonoBehaviour
     {
+        [HideInInspector] public static MUCOServerNetworkManager Instance { get; private set; } = null;
         [HideInInspector] public MUCOServer Server { get; private set; } = null;
 
         [Header("Networking")]
@@ -19,15 +20,29 @@ namespace PhenomenalViborg.MUCOSDK
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_UserPrefab = null;
 
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this.gameObject);
+                Debug.LogError("MUCOServerNetworkManager is a singleton, multiple instances are not supported!");
+                return;
+            }
+
+            Instance = this;
+        }
+
         private void Start()
         {
             MUCOLogger.LogEvent += Log;
             MUCOLogger.LogLevel = m_LogLevel;
 
             Server = new MUCOServer();
-            Server.Start(m_ServerPort);
+            Server.RegisterPacketHandler((int)MUCOClientPackets.TranslateUser, HandleTranslateUser);
             Server.OnClientConnectedEvent += OnClientConnected;
             Server.OnClientDisconnectedEvent += OnClientDisconnected;
+            Server.Start(m_ServerPort);
         }
 
         private void Update()
@@ -97,6 +112,26 @@ namespace PhenomenalViborg.MUCOSDK
                     packet.WriteInt(disconnectingClientInfo.UniqueIdentifier);
                     Server.SendPacket(clientInfo, packet);
                 }
+            });
+        }
+
+        private void HandleTranslateUser(MUCOPacket packet, int fromClient)
+        {
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                // Update the clinet position locally on the server.
+                float positionX = packet.ReadFloat();
+                float positionY = packet.ReadFloat();
+                float positionZ = packet.ReadFloat();
+                m_UserObjects[fromClient].transform.position = new Vector3(positionX, positionY, positionZ);
+
+                // Replicate the packet to the other clients.
+                MUCOPacket replicatePacket = new MUCOPacket((int)MUCOServerPackets.TranslateUser);
+                replicatePacket.WriteInt(fromClient);
+                replicatePacket.WriteFloat(positionX);
+                replicatePacket.WriteFloat(positionY);
+                replicatePacket.WriteFloat(positionZ);
+                Server.SendPacketToAllExceptOne(replicatePacket, Server.ClientInfo[fromClient]);
             });
         }
 

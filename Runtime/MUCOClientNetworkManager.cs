@@ -7,6 +7,7 @@ namespace PhenomenalViborg.MUCOSDK
 {
     public class MUCOClientNetworkManager : MonoBehaviour
     {
+        [HideInInspector] public static MUCOClientNetworkManager Instance { get; private set; } = null;
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
 
         [Header("Networking")]
@@ -20,6 +21,19 @@ namespace PhenomenalViborg.MUCOSDK
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_UserPrefab = null;
 
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(this.gameObject);
+                Debug.LogError("MUCOClientNetworkManager is a singleton, multiple instances are not supported!");
+                return;
+            }
+
+            Instance = this;
+        }
+
         private void Start()
         {
             MUCOLogger.LogEvent += Log;
@@ -28,6 +42,7 @@ namespace PhenomenalViborg.MUCOSDK
             Client = new MUCOClient();
             Client.RegisterPacketHandler((int)MUCOServerPackets.SpawnUser, HandleSpawnUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.RemoveUser, HandleRemoveUser);
+            Client.RegisterPacketHandler((int)MUCOServerPackets.TranslateUser, HandleTranslateUser);
             Client.Connect(m_ServerAddress, m_ServerPort);
         }
 
@@ -49,7 +64,10 @@ namespace PhenomenalViborg.MUCOSDK
                 int userID = packet.ReadInt();
                 Debug.Log($"User Connected: {userID}");
 
-                m_UserObjects[userID] = Instantiate(m_UserPrefab, new Vector3(userID, 0.0f, 0.0f), Quaternion.identity);
+                m_UserObjects[userID] = Instantiate(m_UserPrefab);
+
+                MUCOUser user = m_UserObjects[userID].GetComponent<MUCOUser>();
+                user.Initialize(userID, false);
             });
         }
 
@@ -62,6 +80,19 @@ namespace PhenomenalViborg.MUCOSDK
 
                 Destroy(m_UserObjects[userID]);
                 m_UserObjects[userID] = null;
+            });
+        }
+
+        private void HandleTranslateUser(MUCOPacket packet)
+        {
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                int userID = packet.ReadInt();
+                float positionX = packet.ReadFloat();
+                float positionY = packet.ReadFloat();
+                float positionZ = packet.ReadFloat();
+
+                m_UserObjects[userID].transform.position = new Vector3(positionX, positionY, positionZ);
             });
         }
         #endregion
