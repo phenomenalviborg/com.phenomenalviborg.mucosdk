@@ -43,6 +43,7 @@ namespace PhenomenalViborg.MUCOSDK
             Client.RegisterPacketHandler((int)MUCOServerPackets.SpawnUser, HandleSpawnUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.RemoveUser, HandleRemoveUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.TranslateUser, HandleTranslateUser);
+            Client.RegisterPacketHandler((int)MUCOServerPackets.RotateUser, HandleRotateUser);
             Client.Connect(m_ServerAddress, m_ServerPort);
         }
 
@@ -93,6 +94,20 @@ namespace PhenomenalViborg.MUCOSDK
                 float positionZ = packet.ReadFloat();
 
                 m_UserObjects[userID].transform.position = new Vector3(positionX, positionY, positionZ);
+            });
+        }
+
+
+        private void HandleRotateUser(MUCOPacket packet)
+        {
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                int userID = packet.ReadInt();
+                float eulerAnglesX = packet.ReadFloat();
+                float eulerAnglesY = packet.ReadFloat();
+                float eulerAnglesZ = packet.ReadFloat();
+
+                m_UserObjects[userID].transform.rotation = Quaternion.Euler(new Vector3(eulerAnglesX, eulerAnglesY, eulerAnglesZ));
             });
         }
         #endregion

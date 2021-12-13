@@ -40,6 +40,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             Server = new MUCOServer();
             Server.RegisterPacketHandler((int)MUCOClientPackets.TranslateUser, HandleTranslateUser);
+            Server.RegisterPacketHandler((int)MUCOClientPackets.RotateUser, HandleRotateUser);
             Server.OnClientConnectedEvent += OnClientConnected;
             Server.OnClientDisconnectedEvent += OnClientDisconnected;
             Server.Start(m_ServerPort);
@@ -131,6 +132,27 @@ namespace PhenomenalViborg.MUCOSDK
                 replicatePacket.WriteFloat(positionX);
                 replicatePacket.WriteFloat(positionY);
                 replicatePacket.WriteFloat(positionZ);
+                Server.SendPacketToAllExceptOne(replicatePacket, Server.ClientInfo[fromClient]);
+            });
+        }
+
+        private void HandleRotateUser(MUCOPacket packet, int fromClient)
+        {
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                // Update the clinet rotation locally on the server.
+                float eulerAnglesX = packet.ReadFloat();
+                float eulerAnglesY = packet.ReadFloat();
+                float eulerAnglesZ = packet.ReadFloat();
+
+                m_UserObjects[fromClient].transform.rotation = Quaternion.Euler(new Vector3(eulerAnglesX, eulerAnglesY, eulerAnglesZ));
+
+                // Replicate the packet to the other clients.
+                MUCOPacket replicatePacket = new MUCOPacket((int)MUCOServerPackets.RotateUser);
+                replicatePacket.WriteInt(fromClient);
+                replicatePacket.WriteFloat(eulerAnglesX);
+                replicatePacket.WriteFloat(eulerAnglesY);
+                replicatePacket.WriteFloat(eulerAnglesZ);
                 Server.SendPacketToAllExceptOne(replicatePacket, Server.ClientInfo[fromClient]);
             });
         }

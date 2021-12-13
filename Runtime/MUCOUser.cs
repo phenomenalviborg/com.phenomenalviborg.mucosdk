@@ -10,7 +10,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         [Header("Replication")]
         [SerializeField] private float m_MinimumTransformUpdateDelta = 0.1f;
-        [SerializeField] private Vector3 m_LastReplicatedPosition = Vector3.zero;
+        private Vector3 m_LastReplicatedPosition = Vector3.zero;
+        private Vector3 m_LastReplicatedRotation = Vector3.zero;
 
         // TODO: Custom data type
         public int UserIdentifier /*{ get; private set; }*/ = -1;
@@ -24,15 +25,31 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void Update()
         {
-            if (IsLocalUser && Vector3.Distance(m_LastReplicatedPosition, transform.position) > m_MinimumTransformUpdateDelta)
+            if (IsLocalUser)
             {
-                m_LastReplicatedPosition = transform.position;
+                // Replicate position
+                if (Vector3.Distance(m_LastReplicatedPosition, transform.position) > m_MinimumTransformUpdateDelta)
+                {
+                    MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.TranslateUser);
+                    packet.WriteFloat(transform.position.x);
+                    packet.WriteFloat(transform.position.y);
+                    packet.WriteFloat(transform.position.z);
+                    MUCOClientNetworkManager.Instance.Client.SendPacket(packet);
 
-                MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.TranslateUser);
-                packet.WriteFloat(transform.position.x);
-                packet.WriteFloat(transform.position.y);
-                packet.WriteFloat(transform.position.z);
-                MUCOClientNetworkManager.Instance.Client.SendPacket(packet);
+                    m_LastReplicatedPosition = transform.position;
+                }
+
+                // Replicate rotation
+                if (m_LastReplicatedRotation != transform.rotation.eulerAngles)
+                {
+                    MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.RotateUser);
+                    packet.WriteFloat(transform.rotation.eulerAngles.x);
+                    packet.WriteFloat(transform.rotation.eulerAngles.y);
+                    packet.WriteFloat(transform.rotation.eulerAngles.z);
+                    MUCOClientNetworkManager.Instance.Client.SendPacket(packet);
+
+                    m_LastReplicatedRotation = transform.rotation.eulerAngles;
+                }
             }
         }
     }
