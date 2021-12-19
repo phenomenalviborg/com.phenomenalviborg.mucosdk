@@ -68,6 +68,8 @@ namespace PhenomenalViborg.MUCOSDK
                 // Create a user object on the server.
                 Debug.Log($"User Connected: {newClientInfo}");
                 m_UserObjects[newClientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
+                MUCOUser user = m_UserObjects[newClientInfo.UniqueIdentifier].GetComponent<MUCOUser>();
+                user.Initialize(newClientInfo.UniqueIdentifier, false);
 
                 // Update the newly connected user about all the other users in existance.
                 foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
