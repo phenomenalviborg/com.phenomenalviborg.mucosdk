@@ -15,6 +15,7 @@ namespace PhenomenalViborg.MUCOSDK
     public enum MUCOClientPackets : int
     {
         TranslateUser,
-        RotateUser
+        RotateUser,
+        DeviceInfo
     }
 }

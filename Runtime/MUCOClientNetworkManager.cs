@@ -21,7 +21,6 @@ namespace PhenomenalViborg.MUCOSDK
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_UserPrefab = null;
 
-
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -97,7 +96,6 @@ namespace PhenomenalViborg.MUCOSDK
             });
         }
 
-
         private void HandleRotateUser(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
@@ -109,6 +107,27 @@ namespace PhenomenalViborg.MUCOSDK
 
                 m_UserObjects[userID].transform.rotation = Quaternion.Euler(new Vector3(eulerAnglesX, eulerAnglesY, eulerAnglesZ));
             });
+        }
+        #endregion
+
+        #region Packet senders
+        public void SendDeviceInfo()
+        {
+            using(MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.DeviceInfo))
+            {
+                packet.WriteFloat(SystemInfo.batteryLevel);
+                packet.WriteInt((int)SystemInfo.batteryStatus);
+                // TODO: String support
+
+                Client.SendPacket(packet);
+            
+
+
+            Debug.Log("Battery level: " + SystemInfo.batteryLevel);
+            Debug.Log("Battery state: " + SystemInfo.batteryStatus);
+            Debug.Log("Device model: " + SystemInfo.deviceModel);
+            Debug.Log("Device UUID: " + SystemInfo.deviceUniqueIdentifier);
+            Debug.Log("Device OS: " + SystemInfo.operatingSystem);
         }
         #endregion
     }

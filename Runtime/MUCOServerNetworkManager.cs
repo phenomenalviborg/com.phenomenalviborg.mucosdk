@@ -20,7 +20,6 @@ namespace PhenomenalViborg.MUCOSDK
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_UserPrefab = null;
 
-
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -41,6 +40,7 @@ namespace PhenomenalViborg.MUCOSDK
             Server = new MUCOServer();
             Server.RegisterPacketHandler((int)MUCOClientPackets.TranslateUser, HandleTranslateUser);
             Server.RegisterPacketHandler((int)MUCOClientPackets.RotateUser, HandleRotateUser);
+            Server.RegisterPacketHandler((int)MUCOClientPackets.DeviceInfo, HandleDeviceInfo);
             Server.OnClientConnectedEvent += OnClientConnected;
             Server.OnClientDisconnectedEvent += OnClientDisconnected;
             Server.Start(m_ServerPort);
@@ -118,6 +118,7 @@ namespace PhenomenalViborg.MUCOSDK
             });
         }
 
+        # region Packet handlers
         private void HandleTranslateUser(MUCOPacket packet, int fromClient)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
@@ -158,6 +159,12 @@ namespace PhenomenalViborg.MUCOSDK
                 Server.SendPacketToAllExceptOne(replicatePacket, Server.ClientInfo[fromClient]);
             });
         }
+
+        private void HandleDeviceInfo(MUCOPacket packet, int fromClient)
+        {
+
+        }
+        #endregion
 
         private static void Log(MUCOLogMessage message)
         {
