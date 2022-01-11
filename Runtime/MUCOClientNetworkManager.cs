@@ -46,7 +46,7 @@ namespace PhenomenalViborg.MUCOSDK
             Client.Connect(m_ServerAddress, m_ServerPort);
         }
 
-        private void OnApplicationQuit()
+        private void OnApplicationQuit()    
         {
             Client.Disconnect();
         }
@@ -113,21 +113,21 @@ namespace PhenomenalViborg.MUCOSDK
         #region Packet senders
         public void SendDeviceInfo()
         {
-            using(MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.DeviceInfo))
-            {
-                packet.WriteFloat(SystemInfo.batteryLevel);
-                packet.WriteInt((int)SystemInfo.batteryStatus);
-                // TODO: String support
-
-                Client.SendPacket(packet);
-            
-
-
             Debug.Log("Battery level: " + SystemInfo.batteryLevel);
             Debug.Log("Battery state: " + SystemInfo.batteryStatus);
             Debug.Log("Device model: " + SystemInfo.deviceModel);
             Debug.Log("Device UUID: " + SystemInfo.deviceUniqueIdentifier);
             Debug.Log("Device OS: " + SystemInfo.operatingSystem);
+
+            using (MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.DeviceInfo))
+            {
+                packet.WriteFloat(SystemInfo.batteryLevel);
+                packet.WriteInt((int)SystemInfo.batteryStatus);
+                packet.WriteString(SystemInfo.deviceModel);
+                packet.WriteString(SystemInfo.deviceUniqueIdentifier);
+                packet.WriteString(SystemInfo.operatingSystem);
+                Client.SendPacket(packet);
+            }
         }
         #endregion
     }

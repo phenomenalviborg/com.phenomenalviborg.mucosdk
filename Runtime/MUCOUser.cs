@@ -7,7 +7,6 @@ namespace PhenomenalViborg.MUCOSDK
 {
     public class MUCOUser : MonoBehaviour
     {
-
         [Header("Replication")]
         [SerializeField] private float m_MinimumTransformUpdateDelta = 0.1f;
         private Vector3 m_LastReplicatedPosition = Vector3.zero;
@@ -21,6 +20,8 @@ namespace PhenomenalViborg.MUCOSDK
         {
             UserIdentifier = userIdentifier;
             IsLocalUser = isLocalUser;
+
+            InvokeRepeating("SendDeviceInfo", 0.0f, 1.0f);
         }
 
         public void Update()
@@ -50,6 +51,14 @@ namespace PhenomenalViborg.MUCOSDK
 
                     m_LastReplicatedRotation = transform.rotation.eulerAngles;
                 }
+            }
+        }
+
+        private void SendDeviceInfo()
+        {
+            if (IsLocalUser)
+            { 
+                MUCOClientNetworkManager.Instance.SendDeviceInfo();
             }
         }
     }

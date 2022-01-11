@@ -5,6 +5,16 @@ using PhenomenalViborg.MUCONet;
 
 namespace PhenomenalViborg.MUCOSDK
 {
+    // TODO: MOVE
+    public struct MUCODeviceInfo
+    {
+        public float BatteryLevel;
+        public BatteryStatus BatteryStatus;
+        public string DeviceModel;
+        public string DeviceUniqueIdentifier;
+        public string OperatingSystem;
+    }
+
     public class MUCOServerNetworkManager : MonoBehaviour
     {
         [HideInInspector] public static MUCOServerNetworkManager Instance { get; private set; } = null;
@@ -16,8 +26,9 @@ namespace PhenomenalViborg.MUCOSDK
         [Header("Debug")]
         [SerializeField] private MUCOLogMessage.MUCOLogLevel m_LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
 
-        [Header("This should not stay in this class!")]
+        // TODO: MOVE
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
+        [HideInInspector] public Dictionary<int, MUCODeviceInfo> ClientDeviceInfo = new Dictionary<int, MUCODeviceInfo>();
         [SerializeField] private GameObject m_UserPrefab = null;
 
         private void Awake()
@@ -162,7 +173,15 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void HandleDeviceInfo(MUCOPacket packet, int fromClient)
         {
+            MUCODeviceInfo deviceInfo = new MUCODeviceInfo { };
 
+            deviceInfo.BatteryLevel = packet.ReadFloat();
+            deviceInfo.BatteryStatus = (BatteryStatus)packet.ReadInt();
+            deviceInfo.DeviceModel = packet.ReadString();
+            deviceInfo.DeviceUniqueIdentifier = packet.ReadString();
+            deviceInfo.OperatingSystem = packet.ReadString();
+
+            ClientDeviceInfo[fromClient] = deviceInfo;
         }
         #endregion
 
