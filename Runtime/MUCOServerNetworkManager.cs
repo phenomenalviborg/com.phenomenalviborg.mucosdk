@@ -29,7 +29,7 @@ namespace PhenomenalViborg.MUCOSDK
         // TODO: MOVE
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [HideInInspector] public Dictionary<int, MUCODeviceInfo> ClientDeviceInfo = new Dictionary<int, MUCODeviceInfo>();
-        [SerializeField] private GameObject m_UserPrefab = null;
+        [SerializeField] private GameObject m_RemoteUserPrefab = null;
 
         private void Awake()
         {
@@ -78,7 +78,7 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 // Create a user object on the server.
                 Debug.Log($"User Connected: {newClientInfo}");
-                m_UserObjects[newClientInfo.UniqueIdentifier] = Instantiate(m_UserPrefab);
+                m_UserObjects[newClientInfo.UniqueIdentifier] = Instantiate(m_RemoteUserPrefab);
                 MUCOUser user = m_UserObjects[newClientInfo.UniqueIdentifier].GetComponent<MUCOUser>();
                 user.Initialize(newClientInfo.UniqueIdentifier, false);
 

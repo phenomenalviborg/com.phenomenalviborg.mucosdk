@@ -19,7 +19,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         [Header("This should not stay in this class!")]
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
-        [SerializeField] private GameObject m_UserPrefab = null;
+        [SerializeField] private GameObject m_RemoteUserPrefab = null;
+        [SerializeField] private GameObject m_LocalUserPrefab = null;
 
         private void Awake()
         {
@@ -64,7 +65,9 @@ namespace PhenomenalViborg.MUCOSDK
                 int userID = packet.ReadInt();
                 Debug.Log($"User Connected: {userID}");
 
-                m_UserObjects[userID] = Instantiate(m_UserPrefab);
+                bool localUser = userID == Client.UniqueIdentifier;
+
+                m_UserObjects[userID] = Instantiate(localUser ? m_LocalUserPrefab : m_RemoteUserPrefab);
 
                 MUCOUser user = m_UserObjects[userID].GetComponent<MUCOUser>();
                 user.Initialize(userID, userID == Client.UniqueIdentifier);
