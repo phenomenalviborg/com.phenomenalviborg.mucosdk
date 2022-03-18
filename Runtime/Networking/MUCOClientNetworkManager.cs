@@ -5,9 +5,8 @@ using PhenomenalViborg.MUCONet;
 
 namespace PhenomenalViborg.MUCOSDK
 {
-    public class MUCOClientNetworkManager : MonoBehaviour
+    public class MUCOClientNetworkManager : MUCOSingleton<MUCOClientNetworkManager>
     {
-        [HideInInspector] public static MUCOClientNetworkManager Instance { get; private set; } = null;
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
 
         [Header("Networking")]
@@ -21,18 +20,6 @@ namespace PhenomenalViborg.MUCOSDK
         [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
         [SerializeField] private GameObject m_RemoteUserPrefab = null;
         [SerializeField] private GameObject m_LocalUserPrefab = null;
-
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(this.gameObject);
-                Debug.LogError("MUCOClientNetworkManager is a singleton, multiple instances are not supported!");
-                return;
-            }
-
-            Instance = this;
-        }
 
         private void Start()
         {

@@ -15,9 +15,8 @@ namespace PhenomenalViborg.MUCOSDK
         public string OperatingSystem;
     }
 
-    public class MUCOServerNetworkManager : MonoBehaviour
+    public class MUCOServerNetworkManager : MUCOSingleton<MUCOServerNetworkManager>
     {
-        [HideInInspector] public static MUCOServerNetworkManager Instance { get; private set; } = null;
         [HideInInspector] public MUCOServer Server { get; private set; } = null;
 
         [Header("Networking")]
@@ -31,17 +30,6 @@ namespace PhenomenalViborg.MUCOSDK
         [HideInInspector] public Dictionary<int, MUCODeviceInfo> ClientDeviceInfo = new Dictionary<int, MUCODeviceInfo>();
         [SerializeField] private GameObject m_RemoteUserPrefab = null;
 
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(this.gameObject);
-                Debug.LogError("MUCOServerNetworkManager is a singleton, multiple instances are not supported!");
-                return;
-            }
-
-            Instance = this;
-        }
 
         private void Start()
         {
@@ -55,16 +43,6 @@ namespace PhenomenalViborg.MUCOSDK
             Server.OnClientConnectedEvent += OnClientConnected;
             Server.OnClientDisconnectedEvent += OnClientDisconnected;
             Server.Start(m_ServerPort);
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.SpawnUser);
-                packet.WriteInt(999);
-                Server.SendPacketToAll(packet);
-            }
         }
 
         private void OnApplicationQuit()
