@@ -3,6 +3,9 @@
 	"allowUnsafeCode": false,
     "overrideReferences": false,
     "autoReferenced": true,
+    "references": [
+        "PhenomenalViborg.MUCONet"
+    ],
     "includePlatforms": [
         "Editor",
         "WindowsStandalone64",

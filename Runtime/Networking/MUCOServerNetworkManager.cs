@@ -167,5 +167,16 @@ namespace PhenomenalViborg.MUCOSDK
         {
             Debug.Log(message.ToString());
         }
+        private void OnGUI()
+        {
+            GUILayout.BeginVertical();
+            GUILayout.Label(string.Format("<b>Server</b> \n" +
+                $"Address: {Server.GetAddress()}" +
+                $"Port: {Server.GetPort()}" +
+                $"Active Connections: {Server}" +
+                $"Packets Sent: {3}" +
+                $"Packets Received: {4}"));
+            GUILayout.EndVertical();
+        }
     }
 }

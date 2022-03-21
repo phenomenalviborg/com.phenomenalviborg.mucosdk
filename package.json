@@ -1,7 +1,7 @@
 {
   "name": "com.phenomenalviborg.mucosdk",
-  "version": "0.4.7",
-  "displayName": "MUCOSDK",
+  "version": "1.0.0",
+  "displayName": "MUCO SDK",
   "unity": "2020.1",
   "documentationUrl": "",
   "changelogUrl": "",
@@ -11,7 +11,9 @@
     "MUCO"
   ],
   "author": {
-    "name": "Storm S\u00f8ndergaard"
+    "name": "Storm Søndergaard"
   },
-  "dependencies": {}
+  "dependencies": {
+    "com.phenomenalviborg.muconet": "1.0.0"
+  }
 }
