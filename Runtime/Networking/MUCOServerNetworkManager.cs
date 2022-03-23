@@ -50,7 +50,7 @@ namespace PhenomenalViborg.MUCOSDK
             Server.Stop();
         }
 
-        private void OnClientConnected(MUCOServer.MUCOClientInfo newClientInfo)
+        private void OnClientConnected(MUCOServer.MUCORemoteClient newClientInfo)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -61,7 +61,7 @@ namespace PhenomenalViborg.MUCOSDK
                 user.Initialize(newClientInfo.UniqueIdentifier, false);
 
                 // Update the newly connected user about all the other users in existance.
-                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                foreach (MUCOServer.MUCORemoteClient clientInfo in Server.ClientInfo.Values)
                 {
                     if (clientInfo.UniqueIdentifier == newClientInfo.UniqueIdentifier)
                     {
@@ -74,7 +74,7 @@ namespace PhenomenalViborg.MUCOSDK
                 }
 
                 // Spawn the new user on all clients (includeing the new client).
-                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                foreach (MUCOServer.MUCORemoteClient clientInfo in Server.ClientInfo.Values)
                 {
                     MUCOPacket packet = new MUCOPacket((int)MUCOServerPackets.SpawnUser);
                     packet.WriteInt(newClientInfo.UniqueIdentifier);
@@ -83,7 +83,7 @@ namespace PhenomenalViborg.MUCOSDK
             });
         }
 
-        private void OnClientDisconnected(MUCOServer.MUCOClientInfo disconnectingClientInfo)
+        private void OnClientDisconnected(MUCOServer.MUCORemoteClient disconnectingClientInfo)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -93,7 +93,7 @@ namespace PhenomenalViborg.MUCOSDK
                 m_UserObjects[disconnectingClientInfo.UniqueIdentifier] = null;
 
                 // Remove the disconnecting user on all clients (includeing the new client).
-                foreach (MUCOServer.MUCOClientInfo clientInfo in Server.ClientInfo.Values)
+                foreach (MUCOServer.MUCORemoteClient clientInfo in Server.ClientInfo.Values)
                 {
                     if (clientInfo.UniqueIdentifier == disconnectingClientInfo.UniqueIdentifier)
                     {
@@ -170,12 +170,22 @@ namespace PhenomenalViborg.MUCOSDK
         private void OnGUI()
         {
             GUILayout.BeginVertical();
-            GUILayout.Label(string.Format("<b>Server</b> \n" +
-                $"Address: {Server.GetAddress()}" +
-                $"Port: {Server.GetPort()}" +
-                $"Active Connections: {Server}" +
-                $"Packets Sent: {3}" +
-                $"Packets Received: {4}"));
+            GUILayout.Label(string.Format("<b>Server</b>\n" +
+                $"Address: {Server.GetAddress()}\n" +
+                $"Port: {Server.GetPort()}\n" +
+                $"Active Connections: {Server.GetConnectionCount()}\n" +
+                $"Packets Sent: {Server.GetPacketsSendCount()}\n" +
+                $"Packets Received: {Server.GetPacketsReceivedCount()}\n"));
+
+            foreach (MUCOServer.MUCORemoteClient clientInfo in Server.ClientInfo.Values)
+            {
+                GUILayout.Label(string.Format($"<b>Client {clientInfo.UniqueIdentifier}</b>\n" +
+                 $"Address: {clientInfo.GetAddress()}\n" +
+                 $"Port: {clientInfo.GetPort()}\n" +
+                 $"Packets Sent: {Server.ClientStatistics[clientInfo.UniqueIdentifier].PacketsSent}\n" +
+                 $"Packets Received: {Server.ClientStatistics[clientInfo.UniqueIdentifier].PacketsReceived}\n"));
+            }
+
             GUILayout.EndVertical();
         }
     }
