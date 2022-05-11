@@ -62,7 +62,7 @@ namespace PhenomenalViborg.MUCOSDK
                 bool localUser = userID == Client.UniqueIdentifier;
 
                 m_UserObjects[userID] = Instantiate(localUser ? m_LocalUserPrefab : m_RemoteUserPrefab);
-
+                DontDestroyOnLoad(m_UserObjects[userID]);
                 User user = m_UserObjects[userID].GetComponent<User>();
                 user.Initialize(userID, userID == Client.UniqueIdentifier);
             });
