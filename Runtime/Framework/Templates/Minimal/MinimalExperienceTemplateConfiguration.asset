@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 162f40c3cc0e52848abdcc15f400aef4, type: 3}
+  m_Name: MinimalExperienceTemplateConfiguration
+  m_EditorClassIdentifier: 
+  Name: Minimal Experience
+  Description: 
+  Scene: {fileID: 102900000, guid: a38b597455e43bb4d8a4801cd6c3f960, type: 3}
+  LocalUserPrefab: {fileID: 8466323033043974117, guid: 09d460d44b7978740aae0b104a193922, type: 3}
+  RemoteUserPrefab: {fileID: 8466323033043974117, guid: fc832a1110af38e4d86b490cd8561e8c, type: 3}

@@ -4,7 +4,8 @@
     "overrideReferences": false,
     "autoReferenced": true,
     "references": [
-        "PhenomenalViborg.MUCONet"
+        "PhenomenalViborg.MUCONet",
+        "Antilatency.SDK"
     ],
     "includePlatforms": [
         "Editor",
