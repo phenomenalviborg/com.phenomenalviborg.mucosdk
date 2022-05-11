@@ -16,6 +16,9 @@ namespace PhenomenalViborg.MUCOSDK
         private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle;
         private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle;
 
+        public Antilatency.SDK.DeviceNetwork GetDeviceNetwork() { return m_DeviceNetwork; }
+        public Antilatency.SDK.AltEnvironmentComponent GetEnvironment() { return m_Environment; }
+
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);

@@ -33,17 +33,23 @@ namespace PhenomenalViborg.MUCOSDK
             Client.RegisterPacketHandler((int)MUCOServerPackets.TranslateUser, HandleTranslateUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.RotateUser, HandleRotateUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.LoadExperience, HandleLoadExperience);
-            Client.Connect(m_ServerAddress, m_ServerPort);
         }
 
         public void Connect(string address, int port)
         {
             Debug.Log($"Connecting: {address}:{port}");
+            Client.Connect(m_ServerAddress, m_ServerPort);
+        }
+
+        public void Disconnect()
+        {
+            Client.Disconnect();
         }
 
         private void OnApplicationQuit()
         {
-            Client.Disconnect();
+            // TODO: If connected
+            Disconnect();
         }
 
         private static void Log(MUCOLogMessage message)
