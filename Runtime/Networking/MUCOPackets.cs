@@ -9,7 +9,8 @@ namespace PhenomenalViborg.MUCOSDK
         SpawnUser,
         RemoveUser,
         TranslateUser,
-        RotateUser
+        RotateUser,
+        LoadExperience
     }
 
     public enum MUCOClientPackets : int
