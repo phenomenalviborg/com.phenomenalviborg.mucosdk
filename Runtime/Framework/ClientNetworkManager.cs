@@ -127,6 +127,14 @@ namespace PhenomenalViborg.MUCOSDK
 
         #region Packet senders
 
+        public void SendReplicatedUnicastPacket(MUCOPacket packet, User receiver)
+        {
+            using (MUCOPacket unicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedUnicast))
+            {
+
+            }
+        }
+
         public void SendReplicatedMulticastPacket(MUCOPacket packet)
         {
             using (MUCOPacket multicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedMulticast))
