@@ -88,6 +88,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void HandleTranslateUser(MUCOPacket packet)
         {
+            Debug.Log("It's alive!");
+            return;
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
                 int userID = packet.ReadInt();
@@ -124,6 +126,18 @@ namespace PhenomenalViborg.MUCOSDK
         #endregion
 
         #region Packet senders
+
+        public void SendReplicatedMulticastPacket(MUCOPacket packet)
+        {
+            using (MUCOPacket multicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedMulticast))
+            {
+                packet.SetReadOffset(0);
+                multicastPacket.WriteBytes(packet.ReadBytes(packet.GetSize()));
+                Client.SendPacket(multicastPacket);
+            }
+        }
+
+        // TODO: InvokeRepeating("SendDeviceInfo", 0.0f, 1.0f);
         public void SendDeviceInfo()
         {
             Debug.Log("Battery level: " + SystemInfo.batteryLevel);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PhenomenalViborg.MUCOSDK
 {
-    public enum MUCOServerPackets : int
+    public enum MUCOServerPackets : int // TODO: Replace with System.UInt32
     {
         SpawnUser,
         RemoveUser,
@@ -13,10 +13,12 @@ namespace PhenomenalViborg.MUCOSDK
         LoadExperience
     }
 
-    public enum MUCOClientPackets : int
+    public enum MUCOClientPackets : int // TODO: Replace with System.UInt32
     {
         TranslateUser,
         RotateUser,
-        DeviceInfo
+        DeviceInfo,
+        ReplicatedMulticast,
+        ReplicatedUnicast
     }
 }
