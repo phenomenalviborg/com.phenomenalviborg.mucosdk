@@ -34,7 +34,24 @@ namespace PhenomenalViborg.MUCOSDK
             }
 
             Debug.Log($"Loading experience '{experienceConfiguration.Scene.name}'.");
-            SceneManager.LoadScene(experienceConfiguration.Scene.name);
+            StartCoroutine(LoadExperienceAsync(experienceConfiguration));
+        }
+
+        public IEnumerator LoadExperienceAsync(ExperienceConfiguration experienceConfiguration)
+        {
+            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.name);
+
+            // Wait until scene loading has completed
+            while (!loadSceneAsync.isDone)
+            {
+                // TODO: Find ExperienceManager class from ExperienceConfiguration
+                ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
+                experienceManager.Initialize(experienceConfiguration);
+
+                Debug.Log(experienceManager);
+
+                yield return null;
+            }
         }
     }
 }

@@ -6,6 +6,12 @@ using PhenomenalViborg.MUCONet;
 
 namespace PhenomenalViborg.MUCOSDK
 {
+    public struct NetworkUser
+    {
+        public int Identifier;
+        public bool IsLocalUser;
+    }
+
     public class ClientNetworkManager : PhenomenalViborg.MUCOSDK.IManager<ClientNetworkManager>
     {
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
@@ -17,10 +23,7 @@ namespace PhenomenalViborg.MUCOSDK
         [Header("Debug")]
         [SerializeField] private MUCOLogMessage.MUCOLogLevel m_LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
 
-        [Header("This should not stay in this class!")]
-        [SerializeField] private Dictionary<int, GameObject> m_UserObjects = new Dictionary<int, GameObject>();
-        [SerializeField] private GameObject m_RemoteUserPrefab = null;
-        [SerializeField] private GameObject m_LocalUserPrefab = null;
+        private List<NetworkUser> m_NetworkUsers = new List<NetworkUser>();
 
         private void Start()
         {
@@ -57,38 +60,41 @@ namespace PhenomenalViborg.MUCOSDK
             Debug.Log(message.ToString());
         }
 
+        public List<NetworkUser> GetNetworkUsers()
+        {
+            return m_NetworkUsers;
+        }
+
         # region Packet handlers
         private void HandleSpawnUser(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
-                int userID = packet.ReadInt();
-                Debug.Log($"User Connected: {userID}");
+                NetworkUser networkUser;
+                networkUser.Identifier = packet.ReadInt();
+                Debug.Log($"User Connected: {networkUser.Identifier}");
+                networkUser.IsLocalUser = (networkUser.Identifier == Client.UniqueIdentifier);
+                m_NetworkUsers.Add(networkUser);
 
-                bool localUser = userID == Client.UniqueIdentifier;
-
-                m_UserObjects[userID] = Instantiate(localUser ? m_LocalUserPrefab : m_RemoteUserPrefab);
-                DontDestroyOnLoad(m_UserObjects[userID]);
-                User user = m_UserObjects[userID].GetComponent<User>();
-                user.Initialize(userID, userID == Client.UniqueIdentifier);
+                //ExperienceManager.GetInstance().SpawnUser(networkUser);
             });
         }
 
         private void HandleRemoveUser(MUCOPacket packet)
         {
-            MUCOThreadManager.ExecuteOnMainThread(() =>
+            /*MUCOThreadManager.ExecuteOnMainThread(() =>
             {
                 int userID = packet.ReadInt();
                 Debug.Log($"User Disconnected: {userID}");
 
                 Destroy(m_UserObjects[userID]);
                 m_UserObjects[userID] = null;
-            });
+            });*/
         }
 
         private void HandleTranslateUser(MUCOPacket packet)
         {
-            Debug.Log("It's alive!");
+            /*Debug.Log("It's alive!");
             return;
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -98,12 +104,12 @@ namespace PhenomenalViborg.MUCOSDK
                 float positionZ = packet.ReadFloat();
 
                 m_UserObjects[userID].transform.position = new Vector3(positionX, positionY, positionZ);
-            });
+            });*/
         }
 
         private void HandleRotateUser(MUCOPacket packet)
         {
-            MUCOThreadManager.ExecuteOnMainThread(() =>
+            /*MUCOThreadManager.ExecuteOnMainThread(() =>
             {
                 int userID = packet.ReadInt();
                 float eulerAnglesX = packet.ReadFloat();
@@ -111,7 +117,7 @@ namespace PhenomenalViborg.MUCOSDK
                 float eulerAnglesZ = packet.ReadFloat();
 
                 m_UserObjects[userID].transform.rotation = Quaternion.Euler(new Vector3(eulerAnglesX, eulerAnglesY, eulerAnglesZ));
-            });
+            });*/
         }
 
         private void HandleLoadExperience(MUCOPacket packet)
@@ -126,7 +132,6 @@ namespace PhenomenalViborg.MUCOSDK
         #endregion
 
         #region Packet senders
-
         public void SendReplicatedUnicastPacket(MUCOPacket packet, User receiver)
         {
             using (MUCOPacket unicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedUnicast))

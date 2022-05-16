@@ -41,6 +41,7 @@ namespace PhenomenalViborg.MUCOSDK
                 packet.WriteFloat(1.0f);
                 packet.WriteFloat(1.0f);
                 packet.WriteFloat(1.0f);
+
                 ClientNetworkManager.GetInstance().SendReplicatedMulticastPacket(packet);
             }
         }
