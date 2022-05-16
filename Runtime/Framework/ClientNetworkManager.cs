@@ -16,10 +16,6 @@ namespace PhenomenalViborg.MUCOSDK
     {
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
 
-        [Header("Networking")]
-        [SerializeField] private string m_ServerAddress = "127.0.0.1";
-        [SerializeField] private int m_ServerPort = 1000;
-
         [Header("Debug")]
         [SerializeField] private MUCOLogMessage.MUCOLogLevel m_LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
 
@@ -33,15 +29,13 @@ namespace PhenomenalViborg.MUCOSDK
             Client = new MUCOClient();
             Client.RegisterPacketHandler((int)MUCOServerPackets.SpawnUser, HandleSpawnUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.RemoveUser, HandleRemoveUser);
-            Client.RegisterPacketHandler((int)MUCOServerPackets.TranslateUser, HandleTranslateUser);
-            Client.RegisterPacketHandler((int)MUCOServerPackets.RotateUser, HandleRotateUser);
             Client.RegisterPacketHandler((int)MUCOServerPackets.LoadExperience, HandleLoadExperience);
         }
 
         public void Connect(string address, int port)
         {
             Debug.Log($"Connecting: {address}:{port}");
-            Client.Connect(m_ServerAddress, m_ServerPort);
+            Client.Connect(address, port);
         }
 
         public void Disconnect()
@@ -78,46 +72,6 @@ namespace PhenomenalViborg.MUCOSDK
 
                 //ExperienceManager.GetInstance().SpawnUser(networkUser);
             });
-        }
-
-        private void HandleRemoveUser(MUCOPacket packet)
-        {
-            /*MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
-                int userID = packet.ReadInt();
-                Debug.Log($"User Disconnected: {userID}");
-
-                Destroy(m_UserObjects[userID]);
-                m_UserObjects[userID] = null;
-            });*/
-        }
-
-        private void HandleTranslateUser(MUCOPacket packet)
-        {
-            /*Debug.Log("It's alive!");
-            return;
-            MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
-                int userID = packet.ReadInt();
-                float positionX = packet.ReadFloat();
-                float positionY = packet.ReadFloat();
-                float positionZ = packet.ReadFloat();
-
-                m_UserObjects[userID].transform.position = new Vector3(positionX, positionY, positionZ);
-            });*/
-        }
-
-        private void HandleRotateUser(MUCOPacket packet)
-        {
-            /*MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
-                int userID = packet.ReadInt();
-                float eulerAnglesX = packet.ReadFloat();
-                float eulerAnglesY = packet.ReadFloat();
-                float eulerAnglesZ = packet.ReadFloat();
-
-                m_UserObjects[userID].transform.rotation = Quaternion.Euler(new Vector3(eulerAnglesX, eulerAnglesY, eulerAnglesZ));
-            });*/
         }
 
         private void HandleLoadExperience(MUCOPacket packet)
