@@ -70,10 +70,22 @@ namespace PhenomenalViborg.MUCOSDK
                 networkUser.IsLocalUser = (networkUser.Identifier == Client.UniqueIdentifier);
                 m_NetworkUsers.Add(networkUser);
 
-                //ExperienceManager.GetInstance().SpawnUser(networkUser);
             });
         }
+        private void HandleRemoveUser(MUCOPacket packet)
+        {
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                int userIdentifier = packet.ReadInt();
+                Debug.Log($"User Disconnected: {userIdentifier}");
 
+                NetworkUser? networkUser = m_NetworkUsers.Find(user => user.Identifier == userIdentifier);
+                if (networkUser != null)
+                {
+                    m_NetworkUsers.Remove((NetworkUser)networkUser);
+                }
+            });
+        }
         private void HandleLoadExperience(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>

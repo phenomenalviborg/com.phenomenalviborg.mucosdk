@@ -13,8 +13,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private Antilatency.Alt.Tracking.ILibrary m_TrackingLibrary;
 
-        private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle;
-        private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle;
+        private Antilatency.DeviceNetwork.NodeHandle? m_AdminNodeHandle = null;
+        private Antilatency.DeviceNetwork.NodeHandle? m_UserNodeHandle = null;
 
         public Antilatency.SDK.DeviceNetwork GetDeviceNetwork() { return m_DeviceNetwork; }
         public Antilatency.SDK.AltEnvironmentComponent GetEnvironment() { return m_Environment; }
@@ -37,18 +37,15 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError("Failed to create tracking library");
                 return;
             }
-
-            m_AdminNodeHandle = new Antilatency.DeviceNetwork.NodeHandle();
-            m_UserNodeHandle = new Antilatency.DeviceNetwork.NodeHandle();
         }
 
         private void Start()
         {
             Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag("Admin");
-            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : new Antilatency.DeviceNetwork.NodeHandle();
+            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? (Antilatency.DeviceNetwork.NodeHandle?)compatibleAdminNodes[0] : null;
 
             Antilatency.DeviceNetwork.NodeHandle[] compatibleUserNodes = GetUsbConnectedIdleIdleTrackerNodesBySocketTag("User");
-            m_UserNodeHandle = compatibleUserNodes.Length > 0 ? compatibleUserNodes[0] : new Antilatency.DeviceNetwork.NodeHandle();
+            m_UserNodeHandle = compatibleUserNodes.Length > 0 ? (Antilatency.DeviceNetwork.NodeHandle?)compatibleUserNodes[0] : null;
 
             Debug.Log($"AdminNodeHandle: {m_AdminNodeHandle}");
             Debug.Log($"UserNodeHandle: {m_UserNodeHandle}");
@@ -57,13 +54,13 @@ namespace PhenomenalViborg.MUCOSDK
         public string GetStringPropertyFromAdminNode(string key)
         {
             Antilatency.DeviceNetwork.INetwork nativeNetwork = m_DeviceNetwork.NativeNetwork;
-            return nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent(m_AdminNodeHandle), key);
+            return m_AdminNodeHandle != null ? nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent((Antilatency.DeviceNetwork.NodeHandle)m_AdminNodeHandle), key) : "";
         }
 
         public byte[] GetBinaryPropertyFromAdminNode(string key)
         {
             Antilatency.DeviceNetwork.INetwork nativeNetwork = m_DeviceNetwork.NativeNetwork;
-            return nativeNetwork.nodeGetBinaryProperty(nativeNetwork.nodeGetParent(m_AdminNodeHandle), key);
+            return m_AdminNodeHandle != null ? nativeNetwork.nodeGetBinaryProperty(nativeNetwork.nodeGetParent((Antilatency.DeviceNetwork.NodeHandle)m_AdminNodeHandle), key) : new byte[0];
         }
 
         private Antilatency.DeviceNetwork.NodeHandle[] GetUsbConnectedIdleIdleTrackerNodesBySocketTag(string socketTag)

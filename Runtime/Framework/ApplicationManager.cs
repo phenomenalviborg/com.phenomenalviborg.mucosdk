@@ -7,15 +7,13 @@ using UnityEngine.SceneManagement;
 
 namespace PhenomenalViborg.MUCOSDK
 {
-    public class ApplicationManager : PhenomenalViborg.MUCOSDK.IManager<ApplicationManager>
+    public class ApplicationManager
     {
         [SerializeField] private ApplicationConfiguration m_ApplicationConfiguration;
-
-        private void Awake()
+        public ApplicationManager()
         {
-            DontDestroyOnLoad(this.gameObject);
+            Debug.Log("ApplicationManager");
         }
-
         public void LoadMenu()
         {
             SceneManager.LoadScene(m_ApplicationConfiguration.MenuScene.name);
@@ -25,6 +23,7 @@ namespace PhenomenalViborg.MUCOSDK
             ClientNetworkManager.GetInstance().Connect(serverAddress, serverPort);
         }
 
+        static public ApplicationManager GetInstance() { return new ApplicationManager(); } // TMP
         public void LoadExperienceByName(string experienceName)
         {
             ExperienceConfiguration experienceConfiguration = m_ApplicationConfiguration.ExperienceConfigurations.Find(ec => ec.Name == experienceName);
@@ -34,7 +33,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
 
             Debug.Log($"Loading experience '{experienceConfiguration.Scene.name}'.");
-            StartCoroutine(LoadExperienceAsync(experienceConfiguration));
+            LoadExperienceAsync(experienceConfiguration);
         }
 
         public IEnumerator LoadExperienceAsync(ExperienceConfiguration experienceConfiguration)
@@ -48,9 +47,9 @@ namespace PhenomenalViborg.MUCOSDK
             }
 
             // TODO: Find ExperienceManager class from ExperienceConfiguration
-            ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
+            /*ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
             experienceManager.Initialize(experienceConfiguration);
-            Debug.Log(experienceManager);
+            Debug.Log(experienceManager);*/
         }
     }
 }
