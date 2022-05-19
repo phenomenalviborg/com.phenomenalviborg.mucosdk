@@ -14,7 +14,7 @@
     "name": "Storm Søndergaard"
   },
   "dependencies": {
-    "com.phenomenalviborg.muconet": "https://github.com/phenomenalviborg/com.phenomenalviborg.muconet",
-    "com.phenomenalviborg.antilatencysdk": "https://github.com/phenomenalviborg/com.phenomenalviborg.antilatencysdk"
+    "com.phenomenalviborg.muconet": "https://github.com/phenomenalviborg/com.phenomenalviborg.muconet.git",
+    "com.phenomenalviborg.antilatencysdk": "https://github.com/phenomenalviborg/com.phenomenalviborg.antilatencysdk.git"
   }
 }
