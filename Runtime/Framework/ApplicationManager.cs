@@ -47,9 +47,10 @@ namespace PhenomenalViborg.MUCOSDK
             }
 
             // TODO: Find ExperienceManager class from ExperienceConfiguration
-            /*ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
+            GameObject gameObject = new GameObject("MUCOExperience");
+            ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
             experienceManager.Initialize(experienceConfiguration);
-            Debug.Log(experienceManager);*/
+            Debug.Log(experienceManager);
         }
     }
 }

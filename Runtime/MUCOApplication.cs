@@ -1,12 +1,27 @@
 using UnityEngine;
+using UnityEditor;
 
 namespace PhenomenalViborg.MUCOSDK
 {    
     public class UnityInitializer
     {
+        private static ApplicationConfiguration m_ApplicationConfiguration;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
+            string relativeApplicationConfigurationPath = $"Assets/ApplicationConfiguration.asset";
+            m_ApplicationConfiguration = AssetDatabase.LoadAssetAtPath<ApplicationConfiguration>(relativeApplicationConfigurationPath);
+            if (m_ApplicationConfiguration == null)
+            {
+                Debug.LogError("Failed to find application configuration!");
+            }
+
+            if (!m_ApplicationConfiguration.ManualInitialization)
+            {
+                return;
+            }
+
             MUCOApplication.Initialize();
         }
     }
@@ -19,7 +34,6 @@ namespace PhenomenalViborg.MUCOSDK
         static ClientNetworkManager s_ClientNetworkManager = null;
 
         static bool s_Initialized = false;
-
         public static void Initialize()
         {
             if (s_Initialized == true) return;

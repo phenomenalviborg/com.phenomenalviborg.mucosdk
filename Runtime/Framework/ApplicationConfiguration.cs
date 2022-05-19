@@ -11,8 +11,9 @@ namespace PhenomenalViborg.MUCOSDK
     {
         public SceneAsset EntryScene;
         public SceneAsset MenuScene;
-
         public List<ExperienceConfiguration> ExperienceConfigurations = new List<ExperienceConfiguration>();
+
+        public bool ManualInitialization = false;
     }
 }
 

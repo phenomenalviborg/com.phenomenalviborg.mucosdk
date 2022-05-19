@@ -12,12 +12,13 @@ namespace PhenomenalViborg.MUCOSDK
         private ApplicationConfiguration m_ApplicationConfiguration;
 
         private SerializedProperty m_ExperienceConfigurationsProperty;
-
+        private SerializedProperty m_ManualInitializationProperty;
         void OnEnable()
         {
             m_ApplicationConfiguration = (ApplicationConfiguration)target;
 
             m_ExperienceConfigurationsProperty = serializedObject.FindProperty("ExperienceConfigurations");
+            m_ManualInitializationProperty = serializedObject.FindProperty("ManualInitialization");
         }
 
         void GuiLine(int i_height = 1)
@@ -56,6 +57,10 @@ namespace PhenomenalViborg.MUCOSDK
             EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_ExperienceConfigurationsProperty, new GUIContent("Experience Configurations"));
             serializedObject.ApplyModifiedProperties();
+
+            EditorGUILayout.Space(16);
+            EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
+
 
             // Debug messages
             if (errorMessages.Count > 0)
