@@ -14,11 +14,6 @@
     "name": "Storm Søndergaard"
   },
   "dependencies": {
-    /*
-      Unity does not support git dependencies in packages, only in projects, so here are the github repos:
-      "com.phenomenalviborg.muconet": "https://github.com/phenomenalviborg/com.phenomenalviborg.muconet.git
-      "com.phenomenalviborg.antilatencysdk": "https://github.com/phenomenalviborg/com.phenomenalviborg.antilatencysdk.git"
-    */
-    "com.phenomenalviborg.muconet" 
+    "com.phenomenalviborg.muconet",
     "com.phenomenalviborg.antilatencysdk"
   }
