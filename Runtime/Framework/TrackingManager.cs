@@ -13,8 +13,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private Antilatency.Alt.Tracking.ILibrary m_TrackingLibrary;
 
-        private Antilatency.DeviceNetwork.NodeHandle? m_AdminNodeHandle = null;
-        private Antilatency.DeviceNetwork.NodeHandle? m_UserNodeHandle = null;
+        private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
+        private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
 
         public Antilatency.SDK.DeviceNetwork GetDeviceNetwork() { return m_DeviceNetwork; }
         public Antilatency.SDK.AltEnvironmentComponent GetEnvironment() { return m_Environment; }
@@ -28,8 +28,9 @@ namespace PhenomenalViborg.MUCOSDK
             m_Environment = gameObject.AddComponent<Antilatency.SDK.AltEnvironmentCode>();
             m_Environment.EnvironmentCode = m_EnvironmentCode;
 
-            m_AltEnvironmentMarkersDrawer = gameObject.AddComponent<Antilatency.SDK.AltEnvironmentMarkersDrawer>();
-            m_AltEnvironmentMarkersDrawer.Environment = m_Environment;
+            // WARN: This causes a crash!
+            // m_AltEnvironmentMarkersDrawer = gameObject.AddComponent<Antilatency.SDK.AltEnvironmentMarkersDrawer>();
+            // m_AltEnvironmentMarkersDrawer.Environment = m_Environment;
 
             m_TrackingLibrary = Antilatency.Alt.Tracking.Library.load();
             if (m_TrackingLibrary == null)
@@ -42,25 +43,30 @@ namespace PhenomenalViborg.MUCOSDK
         private void Start()
         {
             Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag("Admin");
-            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? (Antilatency.DeviceNetwork.NodeHandle?)compatibleAdminNodes[0] : null;
+            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
+            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
+            {
+                Debug.LogError("Failed to find tracking admin node.");
+            }
 
             Antilatency.DeviceNetwork.NodeHandle[] compatibleUserNodes = GetUsbConnectedIdleIdleTrackerNodesBySocketTag("User");
-            m_UserNodeHandle = compatibleUserNodes.Length > 0 ? (Antilatency.DeviceNetwork.NodeHandle?)compatibleUserNodes[0] : null;
-
-            Debug.Log($"AdminNodeHandle: {m_AdminNodeHandle}");
-            Debug.Log($"UserNodeHandle: {m_UserNodeHandle}");
+            m_UserNodeHandle = compatibleUserNodes.Length > 0 ? compatibleUserNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
+            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
+            {
+                Debug.LogError("Failed to find tracking user node.");
+            }
         }
 
         public string GetStringPropertyFromAdminNode(string key)
         {
             Antilatency.DeviceNetwork.INetwork nativeNetwork = m_DeviceNetwork.NativeNetwork;
-            return m_AdminNodeHandle != null ? nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent((Antilatency.DeviceNetwork.NodeHandle)m_AdminNodeHandle), key) : "";
+            return m_AdminNodeHandle != Antilatency.DeviceNetwork.NodeHandle.Null ? nativeNetwork.nodeGetStringProperty(nativeNetwork.nodeGetParent(m_AdminNodeHandle), key) : "";
         }
 
         public byte[] GetBinaryPropertyFromAdminNode(string key)
         {
             Antilatency.DeviceNetwork.INetwork nativeNetwork = m_DeviceNetwork.NativeNetwork;
-            return m_AdminNodeHandle != null ? nativeNetwork.nodeGetBinaryProperty(nativeNetwork.nodeGetParent((Antilatency.DeviceNetwork.NodeHandle)m_AdminNodeHandle), key) : new byte[0];
+            return m_AdminNodeHandle != Antilatency.DeviceNetwork.NodeHandle.Null ? nativeNetwork.nodeGetBinaryProperty(nativeNetwork.nodeGetParent(m_AdminNodeHandle), key) : new byte[0];
         }
 
         private Antilatency.DeviceNetwork.NodeHandle[] GetUsbConnectedIdleIdleTrackerNodesBySocketTag(string socketTag)

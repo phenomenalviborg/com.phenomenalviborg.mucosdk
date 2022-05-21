@@ -2,7 +2,7 @@
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace UnityToolbarExtender.Examples
+namespace PhenomenalViborg.MUCOSDK
 {
 	static class ToolbarStyles
 	{
@@ -25,17 +25,20 @@ namespace UnityToolbarExtender.Examples
 	{
 		static SceneSwitchLeftButton()
 		{
-			ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
+			UnityToolbarExtender.ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
 		}
 
 		static void OnToolbarGUI()
 		{
 			GUILayout.FlexibleSpace();
-
+			
+			
 			GUIStyle style = ToolbarStyles.commandButtonStyle;
 			style.fixedWidth = 0;
 			style.padding.left = 16;
 			style.padding.right = 16;
+
+			GUI.enabled = !EditorApplication.isPlaying;
 			if (GUILayout.Button(new GUIContent("Start from entry", "Start S_Entry"), style))
 			{
 				SceneHelper.StartScene("Packages/com.phenomenalviborg.mucosdk/Runtime/Framework/Shared/S_Entry.unity");
