@@ -61,7 +61,6 @@ namespace PhenomenalViborg.MUCOSDK
 
             EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_ExperienceConfigurationsProperty, new GUIContent("Experience Configurations"));
-            serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
@@ -75,6 +74,8 @@ namespace PhenomenalViborg.MUCOSDK
                     EditorGUILayout.HelpBox(errorMessage.Item1, errorMessage.Item2);
                 }
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

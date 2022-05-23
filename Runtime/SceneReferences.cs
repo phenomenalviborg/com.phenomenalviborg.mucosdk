@@ -43,10 +43,16 @@ public struct SceneReference
 {
     ///<summary>The GUID that uniquely identifies this scene asset, used to serialize scene references reliably.</summary>
     ///<remarks>Even if you move/rename the scene asset, GUID references stay valid.</remarks>
-    public Guid guid => sceneGuid; [SerializeField] Guid sceneGuid;
+    [SerializeField] Guid sceneGuid;
+    public Guid guid => sceneGuid;
+
     ///<summary>Create a reference to a scene using its GUID.</summary>
     ///<param name="guid">The GUID of the scene, found in its .scene.meta file, or obtained from AssetDatabase.</param>
-    public SceneReference(Guid guid) => this.sceneGuid = guid;
+    public SceneReference(Guid guid)
+    {
+        sceneGuid = guid;
+    }
+
     ///<summary>The build index of this scene, which can be used to load it or to obtain scene info.</summary>
 #if UNITY_EDITOR
     public int sceneIndex

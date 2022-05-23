@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Minimal Experience
   Description: 
-  Scene: {fileID: 102900000, guid: a38b597455e43bb4d8a4801cd6c3f960, type: 3}
+  Scene:
+    sceneGuid: a38b597455e43bb4d8a4801cd6c3f960
   LocalUserPrefab: {fileID: 8466323033043974117, guid: 09d460d44b7978740aae0b104a193922, type: 3}
   RemoteUserPrefab: {fileID: 8466323033043974117, guid: fc832a1110af38e4d86b490cd8561e8c, type: 3}

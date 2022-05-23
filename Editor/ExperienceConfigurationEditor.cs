@@ -12,6 +12,7 @@ namespace PhenomenalViborg.MUCOSDK
         private ExperienceConfiguration m_ExperienceConfiguration;
 
         private SerializedProperty m_SceneProperty;
+
         void OnEnable()
         {
             m_SceneProperty = serializedObject.FindProperty("Scene");
@@ -68,6 +69,8 @@ namespace PhenomenalViborg.MUCOSDK
             }
 
             Repaint(); // Fix for bug where 'scene in build' error won't disappear until asset is refocused.
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
