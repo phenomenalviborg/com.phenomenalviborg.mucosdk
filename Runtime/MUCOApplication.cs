@@ -10,8 +10,8 @@ namespace PhenomenalViborg.MUCOSDK
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
-            string relativeApplicationConfigurationPath = $"Assets/ApplicationConfiguration.asset";
-            m_ApplicationConfiguration = AssetDatabase.LoadAssetAtPath<ApplicationConfiguration>(relativeApplicationConfigurationPath);
+            // TODO Unify with ApplicationManager
+            m_ApplicationConfiguration = Resources.Load<ApplicationConfiguration>("ApplicationConfiguration");
             if (m_ApplicationConfiguration == null)
             {
                 Debug.LogError("Failed to find application configuration!");
@@ -28,10 +28,12 @@ namespace PhenomenalViborg.MUCOSDK
 
     public static class MUCOApplication
     {
-        static ApplicationManager s_ApplicationManager = null;
-        static MUCOThreadManager s_ThreadManager = null;
-        static TrackingManager s_TrackingManager = null;
-        static ClientNetworkManager s_ClientNetworkManager = null;
+        private static ApplicationManager s_ApplicationManager = null;
+        private static MUCOThreadManager s_ThreadManager = null;
+        private static TrackingManager s_TrackingManager = null;
+        private static ClientNetworkManager s_ClientNetworkManager = null;
+
+        public static ApplicationManager GetApplicationManager() { return s_ApplicationManager; }
 
         static bool s_Initialized = false;
         public static void Initialize()

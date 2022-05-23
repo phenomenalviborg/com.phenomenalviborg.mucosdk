@@ -64,7 +64,6 @@ namespace PhenomenalViborg.MUCOSDK
             EditorGUILayout.LabelField("MUCO Project Settings", headerStyle);
             EditorGUILayout.Space(32);
 
-
             string relativeApplicationConfigurationPath = $"Assets/ApplicationConfiguration.asset";
             m_ApplicationConfiguration = AssetDatabase.LoadAssetAtPath<ApplicationConfiguration>(relativeApplicationConfigurationPath);
             

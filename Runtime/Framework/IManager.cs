@@ -7,12 +7,12 @@ namespace PhenomenalViborg.MUCOSDK
     public abstract class IManager<T> : MonoBehaviour
     {
         private static Dictionary<Type, object> s_Singletons = new Dictionary<Type, object>();
-
         public static T GetInstance()
         {
+            Debug.Log($"{s_Singletons.ContainsKey(typeof(T))} - {typeof(T).Name}");
             return (T)s_Singletons[typeof(T)];
         }
-        void Awake()
+        protected void Awake()
         {
             if (s_Singletons.ContainsKey(GetType()))
             {

@@ -94,7 +94,7 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 string experienceName = packet.ReadString();
                 Debug.Log($"HandleLoadExperience - {experienceName}");
-                ApplicationManager.GetInstance().LoadExperienceByName(experienceName);
+                MUCOApplication.GetApplicationManager().LoadExperienceByName(experienceName);
             });
         }
         #endregion

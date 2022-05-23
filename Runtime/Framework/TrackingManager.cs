@@ -19,6 +19,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Awake()
         {
+            base.Awake();
+
             m_TrackingLibrary = Antilatency.Alt.Tracking.Library.load();
             if (m_TrackingLibrary == null)
             {
