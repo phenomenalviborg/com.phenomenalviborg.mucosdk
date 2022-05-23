@@ -23,6 +23,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Start()
         {
+            Debug.Log("ClientNetworkManager");
+
             MUCOLogger.LogEvent += Log;
             MUCOLogger.LogLevel = m_LogLevel;
 

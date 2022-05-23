@@ -15,9 +15,10 @@ namespace PhenomenalViborg.MUCOSDK
             if (m_ApplicationConfiguration == null)
             {
                 Debug.LogError("Failed to find application configuration!");
+                return;
             }
 
-            if (!m_ApplicationConfiguration.ManualInitialization)
+            if (m_ApplicationConfiguration.ManualInitialization)
             {
                 return;
             }
@@ -42,6 +43,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             // WARN: GameObject creation HAS to happen on unity's main thread.
             GameObject gameObject = new GameObject("MUCOSDK");
+            Object.DontDestroyOnLoad(gameObject);
             s_ApplicationManager = new ApplicationManager();
             // TODO: There are not reason for all these components to be MonoBehaviours, change it!
             s_ThreadManager = gameObject.AddComponent<MUCOThreadManager>();
