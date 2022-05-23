@@ -21,7 +21,7 @@ namespace PhenomenalViborg.MUCOSDK
         }
         public void LoadMenu()
         {
-            SceneManager.LoadScene(m_ApplicationConfiguration.MenuScene.name);
+            SceneManager.LoadScene(m_ApplicationConfiguration.MenuScene.sceneIndex);
 
             TrackingManager trackingManager = TrackingManager.GetInstance();
             if (trackingManager == null)
@@ -49,12 +49,12 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError($"Failed to find experience configuration with name '{experienceName}' in the specified application configuration.");
             }
 
-            Debug.Log($"Loading experience '{experienceConfiguration.Scene.name}'.");
+            Debug.Log($"Loading experience '{experienceConfiguration.Scene.guid}'.");
             LoadExperienceAsync(experienceConfiguration);
         }
         public IEnumerator LoadExperienceAsync(ExperienceConfiguration experienceConfiguration)
         {
-            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.name);
+            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.guid);
 
             // Wait until scene loading has completed
             while (!loadSceneAsync.isDone)

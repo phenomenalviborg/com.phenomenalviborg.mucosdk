@@ -14,7 +14,7 @@ namespace PhenomenalViborg.MUCOSDK
         public string Name;
         public string Description;
 
-        public SceneAsset Scene;
+        public SceneReference Scene;
 
         public GameObject LocalUserPrefab;
         public GameObject RemoteUserPrefab;

@@ -78,15 +78,14 @@ namespace PhenomenalViborg.MUCOSDK
                 // Create application configuration
                 // TODO: Get scenes in some from some sort of constant MUCOSDK config file.
                 m_ApplicationConfiguration = ScriptableObject.CreateInstance<ApplicationConfiguration>();
-                m_ApplicationConfiguration.EntryScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Packages/com.phenomenalviborg.mucosdk/Runtime/Framework/Shared/S_Entry.unity"); // TODO: Better solution for path
-                m_ApplicationConfiguration.MenuScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Packages/com.phenomenalviborg.mucosdk/Runtime/Framework/Shared/S_Menu.unity"); // TODO: Better solution for path
+                
+                m_ApplicationConfiguration.EntryScene = new SceneReference(AssetDatabase.GUIDFromAssetPath("Packages/com.phenomenalviborg.mucosdk/Runtime/Framework/Shared/S_Entry.unity").ToString()); // TODO: Better solution for path
+                m_ApplicationConfiguration.MenuScene = new SceneReference(AssetDatabase.GUIDFromAssetPath("Packages/com.phenomenalviborg.mucosdk/Runtime/Framework/Shared/S_Menu.unity").ToString()); // TODO: Better solution for path
                 AssetDatabase.CreateAsset(m_ApplicationConfiguration, relativeApplicationConfigurationPath);
 
                 // Add scenes to build settings
                 MUCOEditorUtilities.AddSceneToBuild(m_ApplicationConfiguration.EntryScene);
                 MUCOEditorUtilities.AddSceneToBuild(m_ApplicationConfiguration.MenuScene);
-
-                m_ApplicationConfiguration = m_ApplicationConfiguration;
             }
             EditorGUILayout.Space(8);
             GUI.enabled = false;
@@ -121,8 +120,8 @@ namespace PhenomenalViborg.MUCOSDK
 
                     // Create experiece scene, this should most likely be duplicating a template scene?
                     string relativeExperienceScenePath = $"{relativeProjectPath}/S_{experienceName}.unity";
-                    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(experienceTemplateConfiguration.Scene), relativeExperienceScenePath);
-                    SceneAsset experienceScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(relativeExperienceScenePath);
+                    AssetDatabase.CopyAsset(AssetDatabase.GUIDToAssetPath(experienceTemplateConfiguration.Scene.guid), relativeExperienceScenePath);
+                    SceneReference experienceScene = new SceneReference(AssetDatabase.GUIDFromAssetPath(relativeExperienceScenePath).ToString());
                     MUCOEditorUtilities.AddSceneToBuild(experienceScene);
 
                     // Create experience configuration

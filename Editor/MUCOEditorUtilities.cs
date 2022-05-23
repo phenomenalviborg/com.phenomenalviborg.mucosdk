@@ -8,14 +8,15 @@ namespace PhenomenalViborg.MUCOSDK
 {
     public class MUCOEditorUtilities : MonoBehaviour
     {
-        public static void AddSceneToBuild(SceneAsset sceneAsset)
+        public static void AddSceneToBuild(SceneReference sceneReference)
         {
-            if (EditorBuildSettings.scenes.Select(x => x.path).Contains(AssetDatabase.GetAssetPath(sceneAsset))) return;
+            string sceneAssetPath = AssetDatabase.GUIDToAssetPath(sceneReference.guid);
+            if (EditorBuildSettings.scenes.Select(x => x.path).Contains(sceneAssetPath)) return;
 
             EditorBuildSettingsScene[] originalBuildScenes = EditorBuildSettings.scenes;
             EditorBuildSettingsScene[] newBuildScenes = new EditorBuildSettingsScene[originalBuildScenes.Length + 1];
             System.Array.Copy(originalBuildScenes, newBuildScenes, originalBuildScenes.Length);
-            newBuildScenes[newBuildScenes.Length - 1] = new EditorBuildSettingsScene(AssetDatabase.GetAssetPath(sceneAsset), true);
+            newBuildScenes[newBuildScenes.Length - 1] = new EditorBuildSettingsScene(sceneAssetPath, true);
             EditorBuildSettings.scenes = newBuildScenes;
         }
 
