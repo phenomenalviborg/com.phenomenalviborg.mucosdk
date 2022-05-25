@@ -40,6 +40,12 @@ namespace PhenomenalViborg.MUCOSDK
             Client.Connect(address, port);
         }
 
+        // This basically only exists because of offline mode, and should not ideally be used for other purposes.
+        public void AddNetworkUser(NetworkUser networkUser)
+        {
+            m_NetworkUsers.Add(networkUser);
+        }
+
         public void Disconnect()
         {
             Client.Disconnect();

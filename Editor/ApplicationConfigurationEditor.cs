@@ -16,6 +16,8 @@ namespace PhenomenalViborg.MUCOSDK
         private SerializedProperty m_MenuSceneProperty;
         private SerializedProperty m_ExperienceConfigurationsProperty;
         private SerializedProperty m_ManualInitializationProperty;
+        private SerializedProperty m_OfflineModeProperty;
+
         void OnEnable()
         {
             m_ApplicationConfiguration = (ApplicationConfiguration)target;
@@ -24,6 +26,7 @@ namespace PhenomenalViborg.MUCOSDK
             m_MenuSceneProperty = serializedObject.FindProperty("MenuScene");
             m_ExperienceConfigurationsProperty = serializedObject.FindProperty("ExperienceConfigurations");
             m_ManualInitializationProperty = serializedObject.FindProperty("ManualInitialization");
+            m_OfflineModeProperty = serializedObject.FindProperty("OfflineMode");
         }
 
         void GuiLine(int i_height = 1)
@@ -64,6 +67,9 @@ namespace PhenomenalViborg.MUCOSDK
 
             EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
+
+            EditorGUILayout.Space(16);
+            EditorGUILayout.PropertyField(m_OfflineModeProperty, new GUIContent("Offline Mode"));
 
             // Debug messages
             if (errorMessages.Count > 0)

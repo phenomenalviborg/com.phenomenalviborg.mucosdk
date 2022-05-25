@@ -14,6 +14,7 @@ namespace PhenomenalViborg.MUCOSDK
         public List<ExperienceConfiguration> ExperienceConfigurations = new List<ExperienceConfiguration>();
 
         public bool ManualInitialization = false;
+        public bool OfflineMode = false;
     }
 }
 

@@ -40,9 +40,29 @@ namespace PhenomenalViborg.MUCOSDK
                 return;
             }
 
-            string serverAddress = trackingManager.GetStringPropertyFromAdminNode("ServerAddress");
-            int serverPort = int.Parse(trackingManager.GetStringPropertyFromAdminNode("ServerPort"));
-            clientNetworkManager.Connect(serverAddress, serverPort);
+            if (m_ApplicationConfiguration.OfflineMode)
+            {
+                Debug.Log("Starting in offline mode.");
+                NetworkUser networkUser;
+                networkUser.Identifier = 0;
+                networkUser.IsLocalUser = true;
+                clientNetworkManager.AddNetworkUser(networkUser);
+
+                if (m_ApplicationConfiguration.ExperienceConfigurations.Count() > 0)
+                {
+                    LoadExperienceByName(m_ApplicationConfiguration.ExperienceConfigurations[0].Name);                
+                }
+                else
+                {
+                    Debug.Log("Failed to start offline mode, experience configurations count was 0.");
+                }
+            }
+            else
+            {
+                string serverAddress = trackingManager.GetStringPropertyFromAdminNode("ServerAddress");
+                int serverPort = int.Parse(trackingManager.GetStringPropertyFromAdminNode("ServerPort"));
+                clientNetworkManager.Connect(serverAddress, serverPort);
+            }
         }
 
         public void LoadExperienceByName(string experienceName)
