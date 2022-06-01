@@ -42,7 +42,6 @@ namespace PhenomenalViborg.MUCOSDK
 
             if (m_ApplicationConfiguration.OfflineMode)
             {
-                Debug.Log("Starting in offline mode.");
                 NetworkUser networkUser;
                 networkUser.Identifier = 0;
                 networkUser.IsLocalUser = true;
@@ -73,7 +72,6 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError($"Failed to find experience configuration with name '{experienceName}' in the specified application configuration.");
             }
 
-            Debug.Log($"Loading experience '{experienceConfiguration.Scene.sceneIndex}'.");
             StartCoroutine(LoadExperienceAsync(experienceConfiguration));
         }
 
@@ -91,7 +89,6 @@ namespace PhenomenalViborg.MUCOSDK
             GameObject gameObject = new GameObject("MUCOExperience");
             ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
             experienceManager.Initialize(experienceConfiguration);
-            Debug.Log($"Experience manager found: {experienceManager}");
         }
     }
 }

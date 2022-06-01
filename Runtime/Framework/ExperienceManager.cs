@@ -11,8 +11,6 @@ namespace PhenomenalViborg.MUCOSDK
         
         public void Initialize(ExperienceConfiguration experienceConfiguration)
         {
-            Debug.Log("ExperienceManager::Initialize");
-
             m_ExperienceConfiguration = experienceConfiguration;
 
             // Spawn connected users
@@ -24,7 +22,6 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void SpawnUser(NetworkUser networkUser)
         {
-            Debug.Log("ExperienceManager::SpawnUser");
             GameObject userPrefab = networkUser.IsLocalUser ? m_ExperienceConfiguration.LocalUserPrefab : m_ExperienceConfiguration.RemoteUserPrefab;
             GameObject userGameObject = Instantiate(userPrefab);
             User user = userGameObject.GetComponent<User>();

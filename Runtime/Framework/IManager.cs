@@ -9,7 +9,6 @@ namespace PhenomenalViborg.MUCOSDK
         private static Dictionary<Type, object> s_Singletons = new Dictionary<Type, object>();
         public static T GetInstance()
         {
-            Debug.Log($"{s_Singletons.ContainsKey(typeof(T))} - {typeof(T).Name}");
             return (T)s_Singletons[typeof(T)];
         }
         protected void Awake()

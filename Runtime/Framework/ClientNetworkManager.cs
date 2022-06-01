@@ -16,17 +16,12 @@ namespace PhenomenalViborg.MUCOSDK
     {
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
 
-        [Header("Debug")]
-        [SerializeField] private MUCOLogMessage.MUCOLogLevel m_LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
-
         private List<NetworkUser> m_NetworkUsers = new List<NetworkUser>();
 
         private void Start()
         {
-            Debug.Log("ClientNetworkManager");
-
             MUCOLogger.LogEvent += Log;
-            MUCOLogger.LogLevel = m_LogLevel;
+            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Warn;
 
             Client = new MUCOClient();
             Client.RegisterPacketHandler((int)MUCOServerPackets.SpawnUser, HandleSpawnUser);

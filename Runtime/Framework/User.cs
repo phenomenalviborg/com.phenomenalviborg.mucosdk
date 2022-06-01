@@ -36,11 +36,6 @@ namespace PhenomenalViborg.MUCOSDK
                 // Camera
                 gameObject.AddComponent<Camera>();
 
-                // Antilatency tracking
-                Antilatency.SDK.AltTrackingUsbSocket altTrackingUsbSocket = gameObject.AddComponent<Antilatency.SDK.AltTrackingUsbSocket>();
-                altTrackingUsbSocket.Network = TrackingManager.GetInstance().GetDeviceNetwork();
-                altTrackingUsbSocket.Environment = TrackingManager.GetInstance().GetEnvironment();
-                
                 gameObject.SetActive(true);
             }
 
