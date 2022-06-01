@@ -42,6 +42,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             // WARN: GameObject creation HAS to happen on unity's main thread.
             GameObject managersGameObject = new GameObject("MUCOSDKManagers");
+            Object.DontDestroyOnLoad(managersGameObject);
             s_ApplicationManager = managersGameObject.AddComponent<ApplicationManager>();
             s_ThreadManager = managersGameObject.AddComponent<MUCOThreadManager>();
             s_TrackingManager = managersGameObject.AddComponent<TrackingManager>();

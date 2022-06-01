@@ -31,12 +31,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             if (isLocalUser)
             {
-                gameObject.SetActive(false); // To avoid awake on initialization
-
-                // Camera
                 gameObject.AddComponent<Camera>();
-
-                gameObject.SetActive(true);
             }
 
             s_Users[UserIdentifier] = this;

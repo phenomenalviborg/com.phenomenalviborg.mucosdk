@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -22,10 +23,11 @@ namespace PhenomenalViborg.MUCOSDK
             if (m_DeviceNetworkLibrary == null)
             {
                 Debug.LogError("Failed to load Antilatency device network library.");
+                return;
             }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-            var jni = _library.QueryInterface<AndroidJniWrapper.IAndroidJni>();
+            var jni = m_DeviceNetworkLibrary.QueryInterface<AndroidJniWrapper.IAndroidJni>();
             using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
                 using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity")) {
                     jni.initJni(IntPtr.Zero, activity.GetRawObject());
@@ -60,6 +62,7 @@ namespace PhenomenalViborg.MUCOSDK
             if (m_NativeNetwork == null)
             {
                 Debug.LogError("Failed to create Antilatency device network.");
+                return;
             }
 
             // Create environment from the code.
