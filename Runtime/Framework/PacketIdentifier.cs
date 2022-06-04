@@ -8,7 +8,7 @@ namespace PhenomenalViborg.MUCOSDK
 
     public enum EPacketIdentifier : PacketIdentifier
     {
-        MulticastTranslateUser,
-        MulticastRotateUser
+        MulticastTranslateUser = 10000,
+        MulticastRotateUser = 10001
     }
 }

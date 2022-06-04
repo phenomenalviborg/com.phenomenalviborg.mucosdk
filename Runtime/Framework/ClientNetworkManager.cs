@@ -101,11 +101,14 @@ namespace PhenomenalViborg.MUCOSDK
         #endregion
 
         #region Packet senders
-        public void SendReplicatedUnicastPacket(MUCOPacket packet, User receiver)
+        public void SendReplicatedUnicastPacket(MUCOPacket packet, NetworkUser receiver)
         {
             using (MUCOPacket unicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedUnicast))
             {
-
+                packet.SetReadOffset(0);
+                unicastPacket.WriteInt((int)receiver.Identifier);
+                unicastPacket.WriteBytes(packet.ReadBytes(packet.GetSize()));
+                Client.SendPacket(unicastPacket);
             }
         }
 
