@@ -44,7 +44,7 @@ namespace PhenomenalViborg.MUCOSDK
                 // Replicate position
                 if (m_LastReplicatedPosition != transform.position)
                 {
-                    MUCOPacket packet = new MUCOPacket((int)EPacketIdentifier.MulticastTranslateUser);
+                    MUCOPacket packet = new MUCOPacket((System.UInt16)EPacketIdentifier.MulticastTranslateUser);
                     packet.WriteInt(UserIdentifier);
                     packet.WriteFloat(transform.position.x);
                     packet.WriteFloat(transform.position.y);
@@ -57,7 +57,7 @@ namespace PhenomenalViborg.MUCOSDK
                 // Replicate rotation
                 if (m_LastReplicatedRotation != transform.rotation.eulerAngles)
                 {
-                    MUCOPacket packet = new MUCOPacket((int)EPacketIdentifier.MulticastRotateUser);
+                    MUCOPacket packet = new MUCOPacket((System.UInt16)EPacketIdentifier.MulticastRotateUser);
                     packet.WriteInt(UserIdentifier);
                     packet.WriteFloat(transform.rotation.eulerAngles.x);
                     packet.WriteFloat(transform.rotation.eulerAngles.y);
@@ -66,20 +66,6 @@ namespace PhenomenalViborg.MUCOSDK
 
                     m_LastReplicatedRotation = transform.rotation.eulerAngles;
                 }
-            }
-        }
-
-        public void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log("Sending packet...");
-                MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.TranslateUser);
-                packet.WriteFloat(1.0f);
-                packet.WriteFloat(1.0f);
-                packet.WriteFloat(1.0f);
-
-                ClientNetworkManager.GetInstance().SendReplicatedMulticastPacket(packet);
             }
         }
 
