@@ -24,9 +24,9 @@ namespace PhenomenalViborg.MUCOSDK
             MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Warn;
 
             Client = new MUCOClient();
-            Client.RegisterPacketHandler((int)MUCOServerPackets.SpawnUser, HandleSpawnUser);
-            Client.RegisterPacketHandler((int)MUCOServerPackets.RemoveUser, HandleRemoveUser);
-            Client.RegisterPacketHandler((int)MUCOServerPackets.LoadExperience, HandleLoadExperience);
+            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
+            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
+            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerLoadExperience, HandleLoadExperience);
         }
 
         public void Connect(string address, int port)
@@ -63,7 +63,7 @@ namespace PhenomenalViborg.MUCOSDK
         }
 
         # region Packet handlers
-        private void HandleSpawnUser(MUCOPacket packet)
+        private void HandleUserConnected(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -75,7 +75,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             });
         }
-        private void HandleRemoveUser(MUCOPacket packet)
+        private void HandleUserDisconnected(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -103,7 +103,7 @@ namespace PhenomenalViborg.MUCOSDK
         #region Packet senders
         public void SendReplicatedUnicastPacket(MUCOPacket packet, NetworkUser receiver)
         {
-            using (MUCOPacket unicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedUnicast))
+            using (MUCOPacket unicastPacket = new MUCOPacket((System.UInt16)EPacketIdentifier.ClientGenericReplicatedUnicast))
             {
                 packet.SetReadOffset(0);
                 unicastPacket.WriteInt((int)receiver.Identifier);
@@ -114,7 +114,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void SendReplicatedMulticastPacket(MUCOPacket packet)
         {
-            using (MUCOPacket multicastPacket = new MUCOPacket((int)MUCOClientPackets.ReplicatedMulticast))
+            using (MUCOPacket multicastPacket = new MUCOPacket((System.UInt16)EPacketIdentifier.ClientGenericReplicatedMulticast))
             {
                 packet.SetReadOffset(0);
                 multicastPacket.WriteBytes(packet.ReadBytes(packet.GetSize()));
@@ -122,7 +122,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        // TODO: InvokeRepeating("SendDeviceInfo", 0.0f, 1.0f);
+        /*// TODO: InvokeRepeating("SendDeviceInfo", 0.0f, 1.0f);
         public void SendDeviceInfo()
         {
             Debug.Log("Battery level: " + SystemInfo.batteryLevel);
@@ -140,7 +140,7 @@ namespace PhenomenalViborg.MUCOSDK
                 packet.WriteString(SystemInfo.operatingSystem);
                 Client.SendPacket(packet);
             }
-        }
+        }*/
         #endregion
     }
 }

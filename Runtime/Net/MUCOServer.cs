@@ -62,7 +62,7 @@ namespace PhenomenalViborg.MUCONet
 		public Dictionary<int, MUCORemoteClient> ClientInfo { get; private set; } = new Dictionary<int, MUCORemoteClient>();
 
 		public delegate void PacketHandler(MUCOPacket packet, int fromClient);
-		private Dictionary<int, PacketHandler> m_PacketHandlers = new Dictionary<int, PacketHandler>();
+		private Dictionary<UInt16, PacketHandler> m_PacketHandlers = new Dictionary<UInt16, PacketHandler>();
 
 		public MUCOServerStatistics ServerStatistics = new MUCOServerStatistics();
 		public Dictionary<int, MUCOClientStatistics> ClientStatistics = new Dictionary<int, MUCOClientStatistics>();
@@ -82,7 +82,7 @@ namespace PhenomenalViborg.MUCONet
 		/// </summary>
 		public MUCOServer()
 		{
-			RegisterPacketHandler((int)MUCOInternalClientPacketIdentifiers.WelcomeRecived, HandleWelcomeReceived);
+			RegisterPacketHandler((UInt16)EInternalPacketIdentifier.ClientWelcomeRecived, HandleWelcomeReceived);
 		}
 
 		/// <summary>
@@ -229,7 +229,7 @@ namespace PhenomenalViborg.MUCONet
 		/// </summary>
 		/// <param name="packetIdentifier">The packet identifier to assign the packet handler.</param>
 		/// <param name="packetHandler">The packet handler delegate.</param>
-		public void RegisterPacketHandler(int packetIdentifier, PacketHandler packetHandler)
+		public void RegisterPacketHandler(UInt16 packetIdentifier, PacketHandler packetHandler)
 		{
 			if (m_PacketHandlers.ContainsKey(packetIdentifier))
 			{
@@ -264,7 +264,7 @@ namespace PhenomenalViborg.MUCONet
 				ClientStatistics.Add(m_PlayerIDCounter, new MUCOClientStatistics());
 
 				// Send welcome packet
-				MUCOPacket welcomePacket = new MUCOPacket((int)MUCOInternalServerPacketIdentifiers.Welcome);
+				MUCOPacket welcomePacket = new MUCOPacket((UInt16)EInternalPacketIdentifier.ServerWelcome);
 				welcomePacket.WriteInt(clientInfo.UniqueIdentifier);
 				SendPacket(clientInfo, welcomePacket);
 
@@ -399,7 +399,7 @@ namespace PhenomenalViborg.MUCONet
 		private void HandlePacket(MUCOPacket packet, int fromClient)
 		{
 			int size = packet.ReadInt();
-			int packetID = packet.ReadInt();
+			UInt16 packetID = packet.ReadUInt16();
 
 			if (m_PacketHandlers.ContainsKey(packetID))
 			{

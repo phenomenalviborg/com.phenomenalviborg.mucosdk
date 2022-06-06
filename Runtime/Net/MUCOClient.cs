@@ -12,7 +12,7 @@ namespace PhenomenalViborg.MUCONet
 	{
 		public delegate void PacketHandler(MUCOPacket packet);
 
-		private Dictionary<int, PacketHandler> m_PacketHandlers = new Dictionary<int, PacketHandler>();
+		private Dictionary<UInt16, PacketHandler> m_PacketHandlers = new Dictionary<UInt16, PacketHandler>();
 
 		private byte[] m_ReceiveBuffer = new byte[MUCOConstants.RECEIVE_BUFFER_SIZE];
 		private Socket m_LocalSocket;
@@ -28,7 +28,7 @@ namespace PhenomenalViborg.MUCONet
 		/// </summary>
 		public MUCOClient()
 		{
-			RegisterPacketHandler((int)MUCOInternalServerPacketIdentifiers.Welcome, HandleWelcome);
+			RegisterPacketHandler((UInt16)EInternalPacketIdentifier.ServerWelcome, HandleWelcome);
 		}
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace PhenomenalViborg.MUCONet
 		/// </summary>
 		/// <param name="packetIdentifier">The packet identifier to assign the packet handler.</param>
 		/// <param name="packetHandler">The packet handler delegate.</param>
-		public void RegisterPacketHandler(int packetIdentifier, PacketHandler packetHandler)
+		public void RegisterPacketHandler(UInt16 packetIdentifier, PacketHandler packetHandler)
 		{
 			if (m_PacketHandlers.ContainsKey(packetIdentifier))
 			{
@@ -214,7 +214,7 @@ namespace PhenomenalViborg.MUCONet
 		private void HandlePacket(MUCOPacket packet)
 		{
 			int size = packet.ReadInt();
-			int packetID = packet.ReadInt();
+			UInt16 packetID = packet.ReadUInt16();
 
 			if (m_PacketHandlers.ContainsKey(packetID))
 			{
@@ -235,7 +235,7 @@ namespace PhenomenalViborg.MUCONet
 
 			OnConnectedEvent?.Invoke();
 
-			MUCOPacket welcomeRecivedPacket = new MUCOPacket((int)MUCOInternalClientPacketIdentifiers.WelcomeRecived);
+			MUCOPacket welcomeRecivedPacket = new MUCOPacket((UInt16)EInternalPacketIdentifier.ClientWelcomeRecived);
 			welcomeRecivedPacket.WriteInt(assignedClientID);
 			SendPacket(welcomeRecivedPacket);
 		}

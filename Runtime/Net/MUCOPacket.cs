@@ -3,24 +3,6 @@ using System.Collections.Generic;
 
 namespace PhenomenalViborg.MUCONet
 {
-	/// <summary>
-	/// Enum containing all internal packets identifiers used to specifiy server packages.
-	/// The value range of internal packets identifiers range from 32768 to 65536.
-	/// </summary>
-	public enum MUCOInternalServerPacketIdentifiers : int
-	{
-		Welcome = 32768,
-	}
-
-	/// <summary>
-	/// Enum containing all internal packets identifiers used to specifiy client packages.
-	/// The value range of internal packets identifiers range from 32768 to 65536.
-	/// </summary>
-	public enum MUCOInternalClientPacketIdentifiers : int
-	{
-		WelcomeRecived = 32768,
-	}
-
 	public class MUCOPacket : IDisposable
 	{
 		private List<byte> m_Data;
@@ -40,13 +22,13 @@ namespace PhenomenalViborg.MUCONet
 		/// Constructs a MUCOPacket and adds the specified int identifier field to the start of the packet data.
 		/// This will primarily be used when creating outgoing packets.
 		/// </summary>
-		/// <param name="data">The initial packet data.</param>
-		public MUCOPacket(int id)
+		/// <param name="packetIdentifier">The packet identifier.</param>
+		public MUCOPacket(System.UInt16 packetIdentifier)
 		{
 			m_Data = new List<byte>();
 			m_ReadOffset = 0;
 
-			WriteInt(id);
+			WriteUInt16(packetIdentifier);
 		}
 
 		/// <summary>
@@ -143,6 +125,15 @@ namespace PhenomenalViborg.MUCONet
 		}
 
 		/// <summary>
+		/// Writes an UInt16 to the packet data.
+		/// </summary>
+		/// <param name="value">The UInt16 to add.</param>
+		public void WriteUInt16(UInt16 value)
+        {
+			m_Data.AddRange(BitConverter.GetBytes(value));
+        }
+
+		/// <summary>
 		/// Writes a float to the packet data.
 		/// </summary>
 		/// <param name="value">The float to add.</param>
@@ -205,6 +196,29 @@ namespace PhenomenalViborg.MUCONet
 			else
 			{
 				MUCOLogger.Error("Could not read value of type 'int', value was out of range.");
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// Reads an UInt16 from the packet data.
+		/// </summary>
+		/// <param name="moveReadOffset">Whether or not to move the buffer's read position offset.</param>
+		/// <returns>The requested UInt16, or 0 if an error occurred.</returns>
+		public System.UInt16 ReadUInt16(bool moveReadOffset = true)
+		{
+			if (m_Data.Count >= m_ReadOffset + sizeof(System.UInt16))
+			{
+				System.UInt16 value = BitConverter.ToUInt16(m_Data.ToArray(), m_ReadOffset);
+				if (moveReadOffset)
+				{
+					m_ReadOffset += sizeof(System.UInt16);
+				}
+				return value;
+			}
+			else
+			{
+				MUCOLogger.Error("Could not read value of type 'UInt16', value was out of range.");
 				return 0;
 			}
 		}
