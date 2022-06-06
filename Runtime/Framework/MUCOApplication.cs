@@ -15,6 +15,7 @@ namespace PhenomenalViborg.MUCOSDK
             if (m_ApplicationConfiguration == null)
             {
                 Debug.LogError("Failed to find application configuration!");
+                return;
             }
 
             if (m_ApplicationConfiguration.ManualInitialization)
