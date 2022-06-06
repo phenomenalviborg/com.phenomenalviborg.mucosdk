@@ -21,7 +21,7 @@ namespace PhenomenalViborg.MUCOSDK
         private void Start()
         {
             MUCOLogger.LogEvent += Log;
-            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Warn;
+            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Trace;
 
             Client = new MUCOClient();
             Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
