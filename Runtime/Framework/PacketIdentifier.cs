@@ -4,11 +4,39 @@ using UnityEngine;
 
 namespace PhenomenalViborg.MUCOSDK
 {
-    using PacketIdentifier = System.UInt32;
+    using PacketIdentifier = System.UInt16;
+
+    /*public enum MUCOServerPackets : int // TODO: Replace with System.UInt32
+    {
+        SpawnUser,
+        RemoveUser,
+        TranslateUser,
+        RotateUser,
+        LoadExperience
+    }
+
+    public enum MUCOClientPackets : int // TODO: Replace with System.UInt32
+    {
+        TranslateUser,
+        RotateUser,
+        DeviceInfo,
+    }*/
 
     public enum EPacketIdentifier : PacketIdentifier
     {
-        MulticastTranslateUser,
-        MulticastRotateUser
+        // MUCOSDK Client packet identiferis 10000-12000
+        ClientGenericReplicatedUnicast = 10000,
+        ClientGenericReplicatedMulticast = 10001,
+
+        // MUCOSDK Multicast packet identifers 12000-14000
+        MulticastTranslateUser = 12000,
+        MulticastRotateUser = 12001,
+
+        // MUCOSDK Unicast packet identifers 14000-16000
+
+        // MUCOSDK Server packet identifiers: 20000-30000
+        ServerUserConnected = 20000,
+        ServerUserDisconnected = 20001,
+        ServerLoadExperience = 20002,
     }
 }

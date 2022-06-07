@@ -13,8 +13,8 @@ namespace PhenomenalViborg.MUCOSDK
         private Antilatency.DeviceNetwork.INetwork m_NativeNetwork;
         private Antilatency.Alt.Environment.IEnvironment m_Environment;
 
-        private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
         private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
+        private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
 
         private void Start()
         {
@@ -73,14 +73,6 @@ namespace PhenomenalViborg.MUCOSDK
                 return;
             }
 
-            // Get admin node
-            Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag("Admin");
-            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
-            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
-            {
-                Debug.LogWarning("Admin node handle was null.");
-            }
-
             // Get user node
             Antilatency.DeviceNetwork.NodeHandle[] compatibleUserNodes = GetUsbConnectedIdleIdleTrackerNodesBySocketTag("User");
             m_UserNodeHandle = compatibleUserNodes.Length > 0 ? compatibleUserNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
@@ -88,20 +80,39 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 Debug.LogWarning("User node handle was null.");
             }
+
+            // Get admin node
+            Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag("Admin");
+            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
+            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
+            {
+                Debug.LogWarning("Admin node handle was null.");
+            }
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            // Update device network.
-            /*if (m_DeviceNetwork)
+            if (m_UserNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
             {
-                uint updateId = m_NativeNetwork.getUpdateId();
-                if (updateId != m_LastNetworkUpdateID)
+                // Get user node
+                Antilatency.DeviceNetwork.NodeHandle[] compatibleUserNodes = GetUsbConnectedIdleIdleTrackerNodesBySocketTag("User");
+                m_UserNodeHandle = compatibleUserNodes.Length > 0 ? compatibleUserNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
+                if (m_UserNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
                 {
-                    DeviceNetworkChanged.Invoke();
-                    m_LastNetworkUpdateID = updateId;
+                    Debug.LogWarning("User node handle was null.");
                 }
-            }*/
+            }
+
+            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
+            {
+                // Get admin node
+                Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag("Admin");
+                m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
+                if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
+                {
+                    Debug.LogWarning("Admin node handle was null.");
+                }
+            }
         }
 
         private void OnDestroy()
