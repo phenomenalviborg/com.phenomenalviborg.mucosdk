@@ -32,13 +32,6 @@ namespace PhenomenalViborg.MUCOSDK
             s_Users[UserIdentifier] = this;
         }
 
-        private void Update()
-        {
-            // TMP
-            this.transform.position = TrackingManager.GetInstance().GetUserPosition();
-            this.transform.rotation = TrackingManager.GetInstance().GetUserRotation();
-        }
-
         private void FixedUpdate()
         {
             if (IsLocalUser)

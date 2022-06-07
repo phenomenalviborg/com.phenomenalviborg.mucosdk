@@ -16,7 +16,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
         private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
-
+        
         private UnityEvent m_DeviceNetworkChanged = new UnityEvent();
         private uint m_LastUpdateId = 0;
 
