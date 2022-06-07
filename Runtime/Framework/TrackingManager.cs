@@ -193,6 +193,9 @@ namespace PhenomenalViborg.MUCOSDK
 
         #region Tracking
 
+        public Vector3 GetUserPosition() { return m_UserNodePosition; } // TMP
+        public Quaternion GetUserRotation() { return m_UserNodeRotation; } // TMP
+
         private void OnDeviceNetworkChanged()
         {
             if (m_UserTrackingCotask != null)

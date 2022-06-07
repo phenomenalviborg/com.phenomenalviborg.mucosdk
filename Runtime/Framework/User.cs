@@ -22,17 +22,24 @@ namespace PhenomenalViborg.MUCOSDK
             UserIdentifier = userIdentifier;
             IsLocalUser = isLocalUser;
 
-            if (s_StaticallyInitialized)
+            if (!s_StaticallyInitialized)
             {
-                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((int)EPacketIdentifier.MulticastTranslateUser, HandleMulticastTranslateUser);
-                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((int)EPacketIdentifier.MulticastRotateUser, HandleMulticastRotateUser);
+                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastTranslateUser, HandleMulticastTranslateUser);
+                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastRotateUser, HandleMulticastRotateUser);
                 s_StaticallyInitialized = true;
             }
 
             s_Users[UserIdentifier] = this;
         }
 
-        public void FixedUpdate()
+        private void Update()
+        {
+            // TMP
+            this.transform.position = TrackingManager.GetInstance().GetUserPosition();
+            this.transform.rotation = TrackingManager.GetInstance().GetUserRotation();
+        }
+
+        private void FixedUpdate()
         {
             if (IsLocalUser)
             {
@@ -64,7 +71,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        public static void HandleMulticastTranslateUser(MUCOPacket packet)
+        private static void HandleMulticastTranslateUser(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
@@ -77,7 +84,7 @@ namespace PhenomenalViborg.MUCOSDK
             });
         }
 
-        public static void HandleMulticastRotateUser(MUCOPacket packet)
+        private static void HandleMulticastRotateUser(MUCOPacket packet)
         {
             MUCOThreadManager.ExecuteOnMainThread(() =>
             {
