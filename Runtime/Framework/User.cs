@@ -29,11 +29,6 @@ namespace PhenomenalViborg.MUCOSDK
                 s_StaticallyInitialized = true;
             }
 
-            if (isLocalUser)
-            {
-                gameObject.AddComponent<Camera>();
-            }
-
             s_Users[UserIdentifier] = this;
         }
 

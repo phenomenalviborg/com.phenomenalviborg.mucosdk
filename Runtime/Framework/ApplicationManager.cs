@@ -11,19 +11,14 @@ namespace PhenomenalViborg.MUCOSDK
     {
         [SerializeField] private ApplicationConfiguration m_ApplicationConfiguration;
 
-        private void Awake()
+        public void LoadMenu()
         {
-            base.Awake();
-
             m_ApplicationConfiguration = Resources.Load<ApplicationConfiguration>("ApplicationConfiguration");
             if (m_ApplicationConfiguration == null)
             {
                 Debug.LogError("Failed to find application configuration!");
             }
-        }
 
-        public void LoadMenu()
-        {
             SceneManager.LoadScene(m_ApplicationConfiguration.MenuScene.sceneIndex);
 
             TrackingManager trackingManager = TrackingManager.GetInstance();
