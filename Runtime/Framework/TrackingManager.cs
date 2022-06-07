@@ -1,5 +1,6 @@
-using System;
+    using System;
 using System.Linq;
+using UnityEngine.Events;
 using UnityEngine;
 
 namespace PhenomenalViborg.MUCOSDK
@@ -15,6 +16,15 @@ namespace PhenomenalViborg.MUCOSDK
 
         private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
         private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
+
+        private UnityEvent m_DeviceNetworkChanged = new UnityEvent();
+        private uint m_LastUpdateId = 0;
+
+        private Antilatency.Alt.Tracking.ITrackingCotask m_UserTrackingCotask;
+        private Vector3 m_UserNodePosition = Vector3.zero;
+        private Quaternion m_UserNodeRotation = Quaternion.identity;
+        private float m_UserTrackingExtrapolationTime = 0.0f;
+        private UnityEngine.Pose m_TrackingPlacement;
 
         private void Start()
         {
@@ -57,7 +67,7 @@ namespace PhenomenalViborg.MUCOSDK
             // Create device network.
             Antilatency.DeviceNetwork.IDeviceFilter deviceFilter = m_DeviceNetworkLibrary.createFilter();
             deviceFilter.addUsbDevice(new Antilatency.DeviceNetwork.UsbDeviceFilter { vid = Antilatency.DeviceNetwork.UsbVendorId.Antilatency, pid = 0x0000 });
-            
+
             m_NativeNetwork = m_DeviceNetworkLibrary.createNetwork(deviceFilter);
             if (m_NativeNetwork == null)
             {
@@ -88,6 +98,36 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 Debug.LogWarning("Admin node handle was null.");
             }
+
+            // Tracking
+            m_DeviceNetworkChanged.AddListener(OnDeviceNetworkChanged);
+            OnDeviceNetworkChanged();
+        }
+
+        private void Update()
+        {
+            // Invoke DeviceNetworkChanged, if changed
+            uint updateId = m_NativeNetwork.getUpdateId();
+            if (updateId != m_LastUpdateId)
+            {
+                m_LastUpdateId = updateId;
+                m_DeviceNetworkChanged.Invoke();
+            }
+
+            // Stop tracking cotask, if task has finished
+            if (m_UserTrackingCotask != null && m_UserTrackingCotask.isTaskFinished())
+            {
+                StopTracking();
+                return;
+            }
+
+            // Update tracking result
+            Antilatency.Alt.Tracking.State trackingState;
+            if (GetTrackingState(out trackingState))
+            {
+                m_UserNodePosition = trackingState.pose.position;
+                m_UserNodeRotation = trackingState.pose.rotation;
+            }
         }
 
         private void FixedUpdate()
@@ -117,6 +157,26 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void OnDestroy()
         {
+            // Terminate tracking
+            if (m_NativeNetwork != null)
+            {
+                m_DeviceNetworkChanged.RemoveListener(OnDeviceNetworkChanged);
+            }
+
+            StopTracking();
+
+            if (m_UserTrackingCotask != null)
+            {
+                m_UserTrackingCotask.Dispose();
+                m_UserTrackingCotask = null;
+            }
+
+            if (m_TrackingLibrary != null)
+            {
+                m_TrackingLibrary.Dispose();
+                m_TrackingLibrary = null;
+            }
+
             // Terminate device network
             if (m_NativeNetwork != null)
             {
@@ -130,6 +190,120 @@ namespace PhenomenalViborg.MUCOSDK
                 m_DeviceNetworkLibrary = null;
             }
         }
+
+        #region Tracking
+
+        private void OnDeviceNetworkChanged()
+        {
+            if (m_UserTrackingCotask != null)
+            {
+                if (m_UserTrackingCotask.isTaskFinished())
+                {
+                    StopTracking();
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (m_UserTrackingCotask == null)
+            {
+                var node = m_UserNodeHandle;
+                if (node != Antilatency.DeviceNetwork.NodeHandle.Null)
+                {
+                    StartTracking(node);
+                }
+            }
+        }
+
+        private bool GetRawTrackingState(out Antilatency.Alt.Tracking.State state)
+        {
+            state = new Antilatency.Alt.Tracking.State();
+            if (m_UserTrackingCotask == null)
+            {
+                return false;
+            }
+
+            state = m_UserTrackingCotask.getState(Antilatency.Alt.Tracking.Constants.DefaultAngularVelocityAvgTime);
+            if (state.stability.stage == Antilatency.Alt.Tracking.Stage.InertialDataInitialization)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private bool GetTrackingState(out Antilatency.Alt.Tracking.State state)
+        {
+            state = new Antilatency.Alt.Tracking.State();
+            if (m_UserTrackingCotask == null)
+            {
+                return false;
+            }
+
+            state = m_UserTrackingCotask.getExtrapolatedState(m_TrackingPlacement, m_UserTrackingExtrapolationTime);
+            if (state.stability.stage == Antilatency.Alt.Tracking.Stage.InertialDataInitialization)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private void StartTracking(Antilatency.DeviceNetwork.NodeHandle node)
+        {
+            if (m_NativeNetwork == null)
+            {
+                Debug.LogError("Native network was null.");
+                return;
+            }
+
+            if (m_NativeNetwork.nodeGetStatus(node) != Antilatency.DeviceNetwork.NodeStatus.Idle)
+            {
+                Debug.LogError("Tracking node has wrong node status.");
+                return;
+            }
+
+            if (m_Environment == null)
+            {
+                Debug.LogError("Environment was null.");
+                return;
+            }
+
+            m_TrackingPlacement = GetPlacement();
+
+            using (var cotaskConstructor = m_TrackingLibrary.createTrackingCotaskConstructor())
+            {
+                m_UserTrackingCotask = cotaskConstructor.startTask(m_NativeNetwork, node, m_Environment);
+
+                if (m_UserTrackingCotask == null)
+                {
+                    StopTracking();
+                    Debug.LogWarning("Failed to start tracking task on node " + node.value);
+                    return;
+                }
+            }
+        }
+
+        private void StopTracking()
+        {
+            if (m_UserTrackingCotask == null)
+            {
+                return;
+            }
+
+            m_UserTrackingCotask.Dispose();
+            m_UserTrackingCotask = null;
+        }
+
+        private Pose GetPlacement()
+        {
+            Debug.LogWarning("TODO: FIX ME!");
+            return Pose.identity;
+        }
+
+        #endregion
+
+        #region Storage
 
         public string GetStringPropertyFromAdminNode(string key)
         {
@@ -160,6 +334,8 @@ namespace PhenomenalViborg.MUCOSDK
 
             return m_NativeNetwork.nodeGetBinaryProperty(m_NativeNetwork.nodeGetParent(m_AdminNodeHandle), key);
         }
+
+        #endregion
 
         private Antilatency.DeviceNetwork.NodeHandle[] GetUsbConnectedIdleIdleTrackerNodesBySocketTag(string socketTag)
         {
