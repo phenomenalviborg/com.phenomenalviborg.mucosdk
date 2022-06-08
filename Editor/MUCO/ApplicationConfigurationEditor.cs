@@ -11,7 +11,6 @@ namespace PhenomenalViborg.MUCOSDK
     {
         private ApplicationConfiguration m_ApplicationConfiguration;
 
-
         private SerializedProperty m_EntrySceneProperty;
         private SerializedProperty m_MenuSceneProperty;
         private SerializedProperty m_ExperienceConfigurationsProperty;
