@@ -14,6 +14,8 @@ namespace PhenomenalViborg.MUCOSDK
         private SerializedProperty m_EntrySceneProperty;
         private SerializedProperty m_MenuSceneProperty;
         private SerializedProperty m_ExperienceConfigurationsProperty;
+        private SerializedProperty m_AdminNodeTagProperty;
+        private SerializedProperty m_UserNodeTagProperty;
         private SerializedProperty m_ManualInitializationProperty;
         private SerializedProperty m_OfflineModeProperty;
 
@@ -24,6 +26,8 @@ namespace PhenomenalViborg.MUCOSDK
             m_EntrySceneProperty = serializedObject.FindProperty("EntryScene");
             m_MenuSceneProperty = serializedObject.FindProperty("MenuScene");
             m_ExperienceConfigurationsProperty = serializedObject.FindProperty("ExperienceConfigurations");
+            m_AdminNodeTagProperty = serializedObject.FindProperty("AdminNodeTag");
+            m_UserNodeTagProperty = serializedObject.FindProperty("UserNodeTag");
             m_ManualInitializationProperty = serializedObject.FindProperty("ManualInitialization");
             m_OfflineModeProperty = serializedObject.FindProperty("OfflineMode");
         }
@@ -60,13 +64,18 @@ namespace PhenomenalViborg.MUCOSDK
             EditorGUILayout.PropertyField(m_MenuSceneProperty, new GUIContent("Menu Scene"));
             //if (!m_ApplicationConfiguration.MenuScene) { errorMessages.Add(new Tuple<string, MessageType>($"Missing scene! Please specify a menu scene for the experience.", MessageType.Error)); }
             //else if (SceneUtility.GetBuildIndexByScenePath(AssetDatabase.GetAssetPath(m_ApplicationConfiguration.MenuScene)) < 0) { errorMessages.Add(new Tuple<string, MessageType>($"Failed to find specified menu scene in build settings! Please verify that your scene path is included in the 'File->Build Setting->Scenes In Build' list.", MessageType.Error)); }
-
             EditorGUILayout.Space(16);
+
             EditorGUILayout.PropertyField(m_ExperienceConfigurationsProperty, new GUIContent("Experience Configurations"));
-
             EditorGUILayout.Space(16);
-            EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
 
+            GUILayout.Label("Tracking");
+            EditorGUILayout.PropertyField(m_AdminNodeTagProperty, new GUIContent("Admin Node Tag"));
+            EditorGUILayout.PropertyField(m_UserNodeTagProperty, new GUIContent("User Node Tag"));
+            EditorGUILayout.Space(16);
+
+            GUILayout.Label("Initialization");
+            EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
             EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_OfflineModeProperty, new GUIContent("Offline Mode"));
 

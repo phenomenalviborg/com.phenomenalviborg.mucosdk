@@ -13,6 +13,11 @@ namespace PhenomenalViborg.MUCOSDK
         public SceneReference MenuScene;
         public List<ExperienceConfiguration> ExperienceConfigurations = new List<ExperienceConfiguration>();
 
+        // Tracking
+        public string AdminNodeTag = "Admin";
+        public string UserNodeTag = "User";
+
+        // Initialization
         public bool ManualInitialization = false;
         public bool OfflineMode = false;
     }

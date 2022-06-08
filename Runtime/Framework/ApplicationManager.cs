@@ -11,6 +11,8 @@ namespace PhenomenalViborg.MUCOSDK
     {
         [SerializeField] private ApplicationConfiguration m_ApplicationConfiguration;
 
+        public ApplicationConfiguration GetApplicationConfiguration() { return m_ApplicationConfiguration; }
+
         private void Awake()
         {
             base.Awake();
