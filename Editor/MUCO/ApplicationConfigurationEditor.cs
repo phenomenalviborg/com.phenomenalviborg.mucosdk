@@ -18,6 +18,9 @@ namespace PhenomenalViborg.MUCOSDK
         private SerializedProperty m_UserNodeTagProperty;
         private SerializedProperty m_ManualInitializationProperty;
         private SerializedProperty m_OfflineModeProperty;
+        private SerializedProperty m_UseStaticServerInfoProperty;
+        private SerializedProperty m_ServerAddress;
+        private SerializedProperty m_ServerPort;
 
         void OnEnable()
         {
@@ -30,6 +33,9 @@ namespace PhenomenalViborg.MUCOSDK
             m_UserNodeTagProperty = serializedObject.FindProperty("UserNodeTag");
             m_ManualInitializationProperty = serializedObject.FindProperty("ManualInitialization");
             m_OfflineModeProperty = serializedObject.FindProperty("OfflineMode");
+            m_UseStaticServerInfoProperty = serializedObject.FindProperty("UseStaticServerInfo");
+            m_ServerAddress = serializedObject.FindProperty("ServerAddress");
+            m_ServerPort = serializedObject.FindProperty("ServerPort");
         }
 
         void GuiLine(int i_height = 1)
@@ -76,8 +82,17 @@ namespace PhenomenalViborg.MUCOSDK
 
             GUILayout.Label("Initialization");
             EditorGUILayout.PropertyField(m_ManualInitializationProperty, new GUIContent("Manual Initialization"));
-            EditorGUILayout.Space(16);
             EditorGUILayout.PropertyField(m_OfflineModeProperty, new GUIContent("Offline Mode"));
+            EditorGUILayout.Space(16);
+
+            GUILayout.Label("Networking");
+            EditorGUILayout.PropertyField(m_UseStaticServerInfoProperty, new GUIContent("Use Static Server Info"));
+            GUI.enabled = m_ApplicationConfiguration.UseStaticServerInfo;
+            EditorGUILayout.PropertyField(m_ServerAddress, new GUIContent("Server Address"));
+            EditorGUILayout.PropertyField(m_ServerPort, new GUIContent("Server Port"));
+            GUI.enabled = false;
+            EditorGUILayout.Space(16);
+
 
             // Debug messages
             if (errorMessages.Count > 0)

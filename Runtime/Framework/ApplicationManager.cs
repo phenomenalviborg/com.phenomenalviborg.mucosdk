@@ -60,8 +60,21 @@ namespace PhenomenalViborg.MUCOSDK
             }
             else
             {
-                string serverAddress = trackingManager.GetStringPropertyFromAdminNode("ServerAddress");
-                int serverPort = int.Parse(trackingManager.GetStringPropertyFromAdminNode("ServerPort"));
+                string serverAddress;
+                int serverPort;
+
+                if (m_ApplicationConfiguration.UseStaticServerInfo)
+                {
+                    serverAddress = m_ApplicationConfiguration.ServerAddress;
+                    serverPort = m_ApplicationConfiguration.ServerPort;
+
+                }
+                else
+                {
+                    serverAddress = trackingManager.GetStringPropertyFromAdminNode("ServerAddress");
+                    serverPort = int.Parse(trackingManager.GetStringPropertyFromAdminNode("ServerPort"));
+                }
+
                 clientNetworkManager.Connect(serverAddress, serverPort);
             }
         }

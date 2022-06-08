@@ -20,6 +20,11 @@ namespace PhenomenalViborg.MUCOSDK
         // Initialization
         public bool ManualInitialization = false;
         public bool OfflineMode = false;
+
+        // Network
+        public bool UseStaticServerInfo = false;
+        public string ServerAddress = "127.0.0.1";
+        public UInt16 ServerPort = 4960;
     }
 }
 
