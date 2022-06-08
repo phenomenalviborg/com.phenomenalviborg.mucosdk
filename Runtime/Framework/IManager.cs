@@ -11,7 +11,7 @@ namespace PhenomenalViborg.MUCOSDK
         {
             return (T)s_Singletons[typeof(T)];
         }
-        protected void Awake()
+        protected virtual void Awake()
         {
             if (s_Singletons.ContainsKey(GetType()))
             {
