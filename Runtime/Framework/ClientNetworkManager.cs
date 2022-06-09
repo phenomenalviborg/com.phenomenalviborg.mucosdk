@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using PhenomenalViborg.MUCONet;
-
+using LiteNetLib;
+using LiteNetLib.Utils;
+using System.Net;
+using System.Net.Sockets;
 
 namespace PhenomenalViborg.MUCOSDK
 {
@@ -12,33 +15,63 @@ namespace PhenomenalViborg.MUCOSDK
         public bool IsLocalUser;
     }
 
-    public class ClientNetworkManager : PhenomenalViborg.MUCOSDK.IManager<ClientNetworkManager>
+    public class ClientNetworkManager : PhenomenalViborg.MUCOSDK.IManager<ClientNetworkManager>, INetEventListener
     {
-        [HideInInspector] public MUCOClient Client { get; private set; } = null;
-
         private List<NetworkUser> m_NetworkUsers = new List<NetworkUser>();
+        public List<NetworkUser> NetworkUsers => m_NetworkUsers;
+        
         private NetworkUser m_LocalNetworkUser;
+
+        public delegate void PacketHandler(MUCOPacket packet);
+        public Dictionary<System.UInt16, PacketHandler> m_PacketHandlers = new Dictionary<System.UInt16, PacketHandler>();
+
+        private NetManager m_Client;
+        private NetDataWriter m_DataWriter;
+
+        public void RegisterPacketHandler(System.UInt16 packetIdentifier, PacketHandler packetHandler)
+        {
+            if (m_PacketHandlers.ContainsKey(packetIdentifier))
+            {
+                MUCOLogger.Error($"Failed to register packet handler to packet identifier: {packetIdentifier}. The specified packet identifier has already been assigned a packet handler.");
+                return;
+            }
+
+            MUCOLogger.Trace($"Successfully assigned a packet handler to packet identifier: {packetIdentifier}");
+
+            m_PacketHandlers.Add(packetIdentifier, packetHandler);
+        }
+
 
         protected override void Awake()
         {
             base.Awake();
 
-            MUCOLogger.LogEvent += Log;
-            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Trace;
-
-            Client = new MUCOClient();
-            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
-            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
-            Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerLoadExperience, HandleLoadExperience);
+            RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
+            RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
         }
 
         public void Connect(string address, int port)
         {
             Debug.Log($"Connecting: {address}:{port}");
-            Client.Connect(address, port);
+
+            m_Client = new NetManager(this);
+            m_DataWriter = new NetDataWriter();
+            m_Client.UnconnectedMessagesEnabled = true;
+            m_Client.UpdateTime = 15;
+            m_Client.Start();
         }
 
-        // This basically only exists because of offline mode, and should not ideally be used for other purposes.
+        void Update()
+        {
+            m_Client.PollEvents();
+
+            var peer = m_Client.FirstPeer;
+            if (peer == null || peer.ConnectionState != ConnectionState.Connected)
+            {
+                m_Client.SendBroadcast(new byte[] { 1 }, 5000);
+            }
+        }
+
         public void AddNetworkUser(NetworkUser networkUser)
         {
             m_NetworkUsers.Add(networkUser);
@@ -46,7 +79,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void Disconnect()
         {
-            Client.Disconnect();
+            m_Client.Stop();
         }
 
         private void OnApplicationQuit()
@@ -68,14 +101,11 @@ namespace PhenomenalViborg.MUCOSDK
             return m_LocalNetworkUser;
         }
 
-        # region Packet handlers
         private void HandleUserConnected(MUCOPacket packet)
         {
-            MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
                 NetworkUser networkUser;
                 networkUser.Identifier = packet.ReadInt();
-                networkUser.IsLocalUser = (networkUser.Identifier == Client.UniqueIdentifier);
+                networkUser.IsLocalUser = (networkUser.Identifier == m_Client.FirstPeer.RemoteId);
 
                 if (networkUser.IsLocalUser)
                 {
@@ -85,12 +115,9 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.Log($"User Connected: {networkUser.Identifier}");
                 m_NetworkUsers.Add(networkUser);
                 ExperienceManager.GetInstance().SpawnUser(networkUser);
-            });
         }
         private void HandleUserDisconnected(MUCOPacket packet)
         {
-            MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
                 int userIdentifier = packet.ReadInt();
                 Debug.Log($"User Disconnected: {userIdentifier}");
 
@@ -100,20 +127,8 @@ namespace PhenomenalViborg.MUCOSDK
                     m_NetworkUsers.Remove((NetworkUser)networkUser);
                     ExperienceManager.GetInstance().RemoveUser((NetworkUser)networkUser);
                 }
-            });
         }
-        private void HandleLoadExperience(MUCOPacket packet)
-        {
-            MUCOThreadManager.ExecuteOnMainThread(() =>
-            {
-                string experienceName = packet.ReadString();
-                Debug.Log($"HandleLoadExperience - {experienceName}");
-                MUCOApplication.GetApplicationManager().LoadExperienceByName(experienceName);
-            });
-        }
-        #endregion
 
-        #region Packet senders
         public void SendReplicatedUnicastPacket(MUCOPacket packet, NetworkUser receiver)
         {
             using (MUCOPacket unicastPacket = new MUCOPacket((System.UInt16)EPacketIdentifier.ClientGenericReplicatedUnicast))
@@ -121,7 +136,7 @@ namespace PhenomenalViborg.MUCOSDK
                 packet.SetReadOffset(0);
                 unicastPacket.WriteInt((int)receiver.Identifier);
                 unicastPacket.WriteBytes(packet.ReadBytes(packet.GetSize()));
-                Client.SendPacket(unicastPacket);
+                SendPacket(unicastPacket);
             }
         }
 
@@ -131,29 +146,53 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 packet.SetReadOffset(0);
                 multicastPacket.WriteBytes(packet.ReadBytes(packet.GetSize()));
-                Client.SendPacket(multicastPacket);
+                SendPacket(multicastPacket);
             }
         }
 
-        /*// TODO: InvokeRepeating("SendDeviceInfo", 0.0f, 1.0f);
-        public void SendDeviceInfo()
+        public void SendPacket(MUCOPacket packet)
         {
-            Debug.Log("Battery level: " + SystemInfo.batteryLevel);
-            Debug.Log("Battery state: " + SystemInfo.batteryStatus);
-            Debug.Log("Device model: " + SystemInfo.deviceModel);
-            Debug.Log("Device UUID: " + SystemInfo.deviceUniqueIdentifier);
-            Debug.Log("Device OS: " + SystemInfo.operatingSystem);
+            m_DataWriter.Reset();
+            m_DataWriter.Put(packet.ToArray(), 0, packet.GetSize());
+            //receiver.Send(m_DataWriter, DeliveryMethod.Sequenced);
+        }
 
-            using (MUCOPacket packet = new MUCOPacket((int)MUCOClientPackets.DeviceInfo))
+        void INetEventListener.OnPeerConnected(NetPeer peer) { }
+        void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) { }
+
+        void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
+        {
+            Debug.Log("[CLIENT] Error " + socketError);
+        }
+
+        void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+        {
+            MUCOPacket packet = new MUCOPacket((byte[])reader.RawData);
+
+            System.UInt16 packetID = reader.GetUShort();
+
+            if (m_PacketHandlers.ContainsKey(packetID))
             {
-                packet.WriteFloat(SystemInfo.batteryLevel);
-                packet.WriteInt((int)SystemInfo.batteryStatus);
-                packet.WriteString(SystemInfo.deviceModel);
-                packet.WriteString(SystemInfo.deviceUniqueIdentifier);
-                packet.WriteString(SystemInfo.operatingSystem);
-                Client.SendPacket(packet);
+                m_PacketHandlers[packetID](packet);
             }
-        }*/
-        #endregion
+            else
+            {
+                MUCOLogger.Error($"Failed to find package handler for packet with identifier: {packetID}");
+            }
+        }
+
+        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+        {
+            if (messageType == UnconnectedMessageType.BasicMessage && m_Client.ConnectedPeersCount == 0 && reader.GetInt() == 1)
+            {
+                Debug.Log("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
+                m_Client.Connect(remoteEndPoint, "sample_app");
+            }
+        }
+
+        void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
+
+        void INetEventListener.OnConnectionRequest(ConnectionRequest request) { }
+        
     }
 }
