@@ -1,4 +1,5 @@
-    using System;
+using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine.Events;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         private Antilatency.DeviceNetwork.NodeHandle m_UserNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
         private Antilatency.DeviceNetwork.NodeHandle m_AdminNodeHandle = Antilatency.DeviceNetwork.NodeHandle.Null;
-        
+
         private UnityEvent m_DeviceNetworkChanged = new UnityEvent();
         private uint m_LastUpdateId = 0;
 
@@ -28,16 +29,9 @@ namespace PhenomenalViborg.MUCOSDK
 
         ApplicationConfiguration m_ApplicationConfiguration;
 
-
         private void Start()
         {
-            ApplicationManager applicationManager = ApplicationManager.GetInstance();
-            if (applicationManager == null)
-            {
-                Debug.LogError("Application manager was null.");
-                return;
-            }
-            m_ApplicationConfiguration = applicationManager.GetApplicationConfiguration();
+            m_ApplicationConfiguration = MUCOApplication.GetApplicationConfiguration();
 
             // Load device network library.
             m_DeviceNetworkLibrary = Antilatency.DeviceNetwork.Library.load();
@@ -94,21 +88,8 @@ namespace PhenomenalViborg.MUCOSDK
                 return;
             }
 
-            // Get user node
-            Antilatency.DeviceNetwork.NodeHandle[] compatibleUserNodes = GetUsbConnectedIdleIdleTrackerNodesBySocketTag(m_ApplicationConfiguration.UserNodeTag);
-            m_UserNodeHandle = compatibleUserNodes.Length > 0 ? compatibleUserNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
-            if (m_UserNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
-            {
-                Debug.LogWarning("User node handle was null.");
-            }
-
-            // Get admin node
-            Antilatency.DeviceNetwork.NodeHandle[] compatibleAdminNodes = GetIdleTrackerNodesBySocketTag(m_ApplicationConfiguration.AdminNodeTag);
-            m_AdminNodeHandle = compatibleAdminNodes.Length > 0 ? compatibleAdminNodes[0] : Antilatency.DeviceNetwork.NodeHandle.Null;
-            if (m_AdminNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
-            {
-                Debug.LogWarning("Admin node handle was null.");
-            }
+            UpdateNodeConnections();
+            InvokeRepeating("UpdateNodeConnections", 5.0f, 5.0f);
 
             // Tracking
             m_DeviceNetworkChanged.AddListener(OnDeviceNetworkChanged);
@@ -141,7 +122,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        private void FixedUpdate()
+        public void UpdateNodeConnections()
         {
             if (m_UserNodeHandle == Antilatency.DeviceNetwork.NodeHandle.Null)
             {

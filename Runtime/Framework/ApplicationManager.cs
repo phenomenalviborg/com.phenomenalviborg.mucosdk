@@ -48,15 +48,6 @@ namespace PhenomenalViborg.MUCOSDK
                 networkUser.Identifier = 0;
                 networkUser.IsLocalUser = true;
                 clientNetworkManager.AddNetworkUser(networkUser);
-
-                if (m_ApplicationConfiguration.ExperienceConfigurations.Count() > 0)
-                {
-                    LoadExperienceByName(m_ApplicationConfiguration.ExperienceConfigurations[0].Name);                
-                }
-                else
-                {
-                    Debug.Log("Failed to start offline mode, experience configurations count was 0.");
-                }
             }
             else
             {
@@ -67,7 +58,6 @@ namespace PhenomenalViborg.MUCOSDK
                 {
                     serverAddress = m_ApplicationConfiguration.ServerAddress;
                     serverPort = m_ApplicationConfiguration.ServerPort;
-
                 }
                 else
                 {
@@ -76,6 +66,15 @@ namespace PhenomenalViborg.MUCOSDK
                 }
 
                 clientNetworkManager.Connect(serverAddress, serverPort);
+            }
+
+            if (m_ApplicationConfiguration.ExperienceConfigurations.Count() > 0)
+            {
+                LoadExperienceByName(m_ApplicationConfiguration.ExperienceConfigurations[0].Name);
+            }
+            else
+            {
+                Debug.Log("Failed to load default experience, experience configurations count was 0.");
             }
         }
 

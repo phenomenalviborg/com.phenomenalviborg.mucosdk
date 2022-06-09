@@ -114,7 +114,7 @@ namespace PhenomenalViborg.MUCONet
 				return;
 			}
 
-			MUCOLogger.Info($"Successfully assigned a packet handler to packet identifier: {packetIdentifier}");
+			MUCOLogger.Trace($"Successfully assigned a packet handler to packet identifier: {packetIdentifier}");
 
 			m_PacketHandlers.Add(packetIdentifier, packetHandler);
 		}
@@ -157,13 +157,17 @@ namespace PhenomenalViborg.MUCONet
 		/// <summary>
 		/// An asynchronous callback used for handling incoming data.
 		/// </summary>
+		int i = 0;
 		private void RecieveCallback(IAsyncResult asyncResult)
 		{
+			MUCOLogger.Error(i.ToString());
+			i++;
+
+			return;
 			try
 			{
-				int bytesReceived = m_LocalSocket.EndReceive(asyncResult);
-
 				MUCOLogger.Trace($"Receiving package from server.");
+				int bytesReceived = m_LocalSocket.EndReceive(asyncResult);
 				if (bytesReceived <= 0)
 				{
 					Disconnect();

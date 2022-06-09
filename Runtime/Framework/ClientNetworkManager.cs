@@ -17,11 +17,14 @@ namespace PhenomenalViborg.MUCOSDK
         [HideInInspector] public MUCOClient Client { get; private set; } = null;
 
         private List<NetworkUser> m_NetworkUsers = new List<NetworkUser>();
+        private NetworkUser m_LocalNetworkUser;
 
-        private void Start()
+        protected override void Awake()
         {
+            base.Awake();
+
             MUCOLogger.LogEvent += Log;
-            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Warn;
+            MUCOLogger.LogLevel = MUCOLogMessage.MUCOLogLevel.Info;
 
             Client = new MUCOClient();
             Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
@@ -54,12 +57,15 @@ namespace PhenomenalViborg.MUCOSDK
 
         private static void Log(MUCOLogMessage message)
         {
-            Debug.Log(message.ToString());
+            MUCOThreadManager.ExecuteOnMainThread(() =>
+            {
+                Debug.Log(message.ToString());
+            });
         }
 
-        public List<NetworkUser> GetNetworkUsers()
+        public NetworkUser GetLocalNetworkUser()
         {
-            return m_NetworkUsers;
+            return m_LocalNetworkUser;
         }
 
         # region Packet handlers
@@ -69,10 +75,16 @@ namespace PhenomenalViborg.MUCOSDK
             {
                 NetworkUser networkUser;
                 networkUser.Identifier = packet.ReadInt();
-                Debug.Log($"User Connected: {networkUser.Identifier}");
                 networkUser.IsLocalUser = (networkUser.Identifier == Client.UniqueIdentifier);
-                m_NetworkUsers.Add(networkUser);
 
+                if (networkUser.IsLocalUser)
+                {
+                    m_LocalNetworkUser = networkUser;
+                }
+
+                Debug.Log($"User Connected: {networkUser.Identifier}");
+                m_NetworkUsers.Add(networkUser);
+                ExperienceManager.GetInstance().SpawnUser(networkUser);
             });
         }
         private void HandleUserDisconnected(MUCOPacket packet)
@@ -86,6 +98,7 @@ namespace PhenomenalViborg.MUCOSDK
                 if (networkUser != null)
                 {
                     m_NetworkUsers.Remove((NetworkUser)networkUser);
+                    ExperienceManager.GetInstance().RemoveUser((NetworkUser)networkUser);
                 }
             });
         }
