@@ -62,7 +62,7 @@ namespace PhenomenalViborg.MUCOSDK
             m_Client.UnconnectedMessagesEnabled = true;
             m_Client.UpdateTime = 15;
             m_Client.Start();
-            m_Client.Connect("localhost", 6000, "MUCO");
+            m_Client.Connect(address, port, "MUCO");
         }
 
         void Update()
