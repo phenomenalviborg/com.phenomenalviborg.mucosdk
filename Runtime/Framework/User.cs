@@ -24,8 +24,8 @@ namespace PhenomenalViborg.MUCOSDK
 
             if (!s_StaticallyInitialized)
             {
-                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastTranslateUser, HandleMulticastTranslateUser);
-                ClientNetworkManager.GetInstance().Client.RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastRotateUser, HandleMulticastRotateUser);
+                ClientNetworkManager.GetInstance().RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastTranslateUser, HandleMulticastTranslateUser);
+                ClientNetworkManager.GetInstance().RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastRotateUser, HandleMulticastRotateUser);
                 s_StaticallyInitialized = true;
             }
 
