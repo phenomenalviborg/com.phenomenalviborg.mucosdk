@@ -158,16 +158,16 @@ namespace PhenomenalViborg.MUCONet
 		/// An asynchronous callback used for handling incoming data.
 		/// </summary>
 		int i = 0;
+		private MUCOPacket receivedData = new MUCOPacket();
 		private void RecieveCallback(IAsyncResult asyncResult)
 		{
 			MUCOLogger.Error(i.ToString());
 			i++;
 
-			return;
 			try
 			{
-				MUCOLogger.Trace($"Receiving package from server.");
 				int bytesReceived = m_LocalSocket.EndReceive(asyncResult);
+				MUCOLogger.Trace($"Receiving package from server.");
 				if (bytesReceived <= 0)
 				{
 					Disconnect();
@@ -177,19 +177,10 @@ namespace PhenomenalViborg.MUCONet
 				byte[] dataReceived = new byte[bytesReceived];
 				Array.Copy(m_ReceiveBuffer, dataReceived, bytesReceived);
 
-				// FIXME: Should i take care of stiching packet segment or does the standard do this for me?
-				// From my tests it seems like the only reason a packet would be split is the receive buffer size?..
-				// Reserch Nagle's algorithm, that might be causeing package splitting without the package size exceeding the receive buffer size.
-				MUCOPacket packet = new MUCOPacket(dataReceived);
-				int packetSize = packet.ReadInt();
-				if (packetSize >= MUCOConstants.RECEIVE_BUFFER_SIZE)
+				if (HandleData(dataReceived))
 				{
-					// If this ever triggers, the package size should be increased or package stitching should be implemented.
-					MUCOLogger.Error($"The package size was greater than the receive buffer size!");
-					return;
+					receivedData.Reset();
 				}
-				packet.SetReadOffset(0);
-				HandlePacket(packet);
 
 				// Begin an asynchronously operation to receive incoming data from clientSocket. Incoming data will be stored in m_ReceiveBuffer 
 				m_LocalSocket.BeginReceive(m_ReceiveBuffer, 0, m_ReceiveBuffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), null);
@@ -215,9 +206,66 @@ namespace PhenomenalViborg.MUCONet
 		/// Makes sure that the specified packet gets passed on the correct PacketHandler.
 		/// </summary>
 		/// <param name="packet">The packet to handle</param>
-		private void HandlePacket(MUCOPacket packet)
+		private bool HandleData(byte[] _data)
 		{
-			int size = packet.ReadInt();
+			MUCOLogger.Info("HandleData()");
+
+			int _packetLength = 0;
+
+			receivedData.WriteBytes(_data);
+
+			if (receivedData.UnreadLength() >= 4)
+			{
+				// If client's received data contains a packet
+				_packetLength = receivedData.ReadInt() - 4;
+				if (_packetLength <= 0)
+				{
+					// If packet contains no data
+					return true; // Reset receivedData instance to allow it to be reused
+				}
+			}
+
+			while (_packetLength > 0 && _packetLength <= receivedData.UnreadLength())
+			{
+				MUCOLogger.Info("Test");
+
+				// While packet contains data AND packet data length doesn't exceed the length of the packet we're reading
+				byte[] _packetBytes = receivedData.ReadBytes(_packetLength);
+				PhenomenalViborg.MUCOSDK.MUCOThreadManager.ExecuteOnMainThread(() =>
+				{
+					using (MUCOPacket _packet = new MUCOPacket(_packetBytes))
+					{
+
+						System.UInt16 _packetId = _packet.ReadUInt16();
+						MUCOLogger.Info($"PacketID: {_packetId}");
+						if (m_PacketHandlers.ContainsKey(_packetId))
+							m_PacketHandlers[_packetId](_packet); // Call appropriate method to handle the packet
+					}
+				});
+
+				_packetLength = 0; // Reset packet length
+				if (receivedData.UnreadLength() >= 4)
+				{
+					// If client's received data contains another packet
+					_packetLength = receivedData.ReadInt();
+					if (_packetLength <= 0)
+					{
+						// If packet contains no data
+						return true; // Reset receivedData instance to allow it to be reused
+					}
+				}
+
+			}
+
+			if (_packetLength <= 1)
+			{
+				return true; // Reset receivedData instance to allow it to be reused
+			}
+
+			return false;
+
+
+			/*int size = packet.ReadInt();
 			UInt16 packetID = packet.ReadUInt16();
 
 			if (m_PacketHandlers.ContainsKey(packetID))
@@ -227,11 +275,11 @@ namespace PhenomenalViborg.MUCONet
 			else
 			{
 				MUCOLogger.Error($"Failed to find package handler for packet with identifier: {packetID}");
-			}
+			}*/
 		}
 
-        #region Internal package handlers
-        private void HandleWelcome(MUCOPacket packet)
+		#region Internal package handlers
+		private void HandleWelcome(MUCOPacket packet)
 		{
 			int assignedClientID = packet.ReadInt();
 			UniqueIdentifier = assignedClientID;
