@@ -47,10 +47,25 @@ namespace PhenomenalViborg.MUCOSDK
         {
             if (IsLocalUser)
             {
-                MulticastTransformHelper(transform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRoot);
-                MulticastTransformHelper(headTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserHead);
-                MulticastTransformHelper(leftHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserLeftHand);
-                MulticastTransformHelper(rightHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRightHand);
+                if (true)
+                {
+                    MulticastTransformHelper(transform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRoot);
+                }
+
+                if (true)
+                {
+                    MulticastTransformHelper(headTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserHead);
+                }
+
+                if (true)
+                {
+                    MulticastTransformHelper(leftHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserLeftHand);
+                }
+
+                if (true)
+                {
+                    MulticastTransformHelper(rightHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRightHand);
+                }
             }
         }
 
