@@ -29,8 +29,9 @@ namespace PhenomenalViborg.MUCOSDK
         ClientGenericReplicatedMulticast = 10001,
 
         // MUCOSDK Multicast packet identifers 12000-14000
-        MulticastTranslateUser = 12000,
-        MulticastRotateUser = 12001,
+        MulticastReplicateGenericVariable = 12000,
+        MulticastTranslateUser = 12001,
+        MulticastRotateUser = 12002,
 
         // MUCOSDK Unicast packet identifers 14000-16000
 

@@ -21,6 +21,7 @@ namespace PhenomenalViborg.MUCOSDK
         public List<NetworkUser> NetworkUsers => m_NetworkUsers;
 
         private NetworkUser m_LocalNetworkUser;
+        public NetworkUser LocalNetworkUser => m_LocalNetworkUser;
 
         private NetPeer m_Server;
 

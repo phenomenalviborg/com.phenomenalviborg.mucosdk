@@ -1,51 +1,91 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine; // TODO: REMOVE
+using PhenomenalViborg.MUCOSDK;
+using PhenomenalViborg.MUCONet;
+using System.Net;
 
 namespace PhenomenalViborg.Networking
 {
-    // 
     public class NetworkIdentity
     {
-        System.UInt16 NetworkIdentifier;
-    }
-
-    #region Replicated properties
-
-    public class ReplicatedVariable<T>
-    {
-        public static implicit operator T(ReplicatedVariable<T> instance)
+        public NetworkIdentity(int networkIdentifier)
         {
-            return instance.Data;
+            NetworkIdentifier = networkIdentifier;
         }
 
-        public static implicit operator ReplicatedVariable<T>(T value)
+        public int NetworkIdentifier;
+    }
+
+    public class QuickAndDirtyReplicatedVariable<T>
+    {
+        private NetworkIdentity m_NetworkIdentity;
+        public NetworkIdentity GetNetworkIdentity() { return m_NetworkIdentity; }
+
+        public T Data;
+        
+        private static System.UInt16 m_IncrementalIdentifier;
+        private System.UInt16 m_VariableIdentifier;
+
+        private bool m_StaticallyInitialized = false;
+
+        public QuickAndDirtyReplicatedVariable(T data, NetworkIdentity networkIdentity)
         {
-            // Called everytime the value is implicitly set, e.g.:
-            // ReplicatedVariable<T> var = 234.0f;
-            // var = 123.45f; Called here
-            // var += 0.5f; Called here
+            this.Data = data;
+            this.m_NetworkIdentity = networkIdentity;
+            this.m_VariableIdentifier = m_IncrementalIdentifier;
 
-            // TODO: Add replication code hereStackFrame
-
-            // THIS IS MESSY, and VERY slow...
-            System.Diagnostics.StackFrame stackFrame = new System.Diagnostics.StackFrame(1);
-            System.Type owningType = stackFrame.GetMethod().ReflectedType;
-            Debug.Log(owningType);
-
-            return new ReplicatedVariable<T> { Data = value };
+            m_IncrementalIdentifier++;
+        
+            if (!m_StaticallyInitialized)
+            {
+                ClientNetworkManager.GetInstance().RegisterPacketHandler((System.UInt16)EPacketIdentifier.MulticastReplicateGenericVariable, HandleMulticastReplicateGenericVariable);
+                m_StaticallyInitialized = true;
+            }
         }
 
-        T Data;
+        public T Get()
+        {
+            return Data;
+        }
+
+        public static byte[] NetSerializeToByteArray(T data)
+        {
+            if (data.GetType() == typeof(int))
+            {
+                byte[] bytes = BitConverter.GetBytes(Convert.ToInt32(data));
+
+                // Convert to network byte order (big-endian).
+                if (BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(bytes);
+                }
+
+                return bytes;
+            }
+
+            return new byte[0];
+        }
+
+        public void Set(T data)
+        {
+            using (MUCOPacket packet = new MUCOPacket((System.UInt16)EPacketIdentifier.MulticastReplicateGenericVariable))
+            {
+                packet.WriteInt(m_NetworkIdentity.NetworkIdentifier);
+                packet.WriteUInt16(m_VariableIdentifier);
+                packet.WriteBytes(NetSerializeToByteArray(data));
+                ClientNetworkManager.GetInstance().SendReplicatedMulticastPacket(packet);
+            }
+
+            this.Data = data;
+        }
+
+        private static void HandleMulticastReplicateGenericVariable(MUCOPacket packet)
+        {
+            int networkIdentifier = packet.ReadInt();
+        }
     }
 
-    public class ReplicatedEvent
-    {
-
-    }
-
-    public class ReplicatedEvent<T> where T : System.EventArgs
-    {
-
-    }
-
-    #endregion
 }
