@@ -31,6 +31,10 @@ namespace PhenomenalViborg.MUCOSDK
         private NetManager m_Client;
         private NetDataWriter m_DataWriter;
 
+        private string serverAddress;
+        private int serverPort;
+        private bool isConnected;
+
         public void RegisterPacketHandler(System.UInt16 packetIdentifier, PacketHandler packetHandler)
         {
             if (m_PacketHandlers.ContainsKey(packetIdentifier))
@@ -44,13 +48,47 @@ namespace PhenomenalViborg.MUCOSDK
             m_PacketHandlers.Add(packetIdentifier, packetHandler);
         }
 
-
         protected override void Awake()
         {
             base.Awake();
 
+            // Register packet handlers
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
+
+            // Initialize from application configuration
+            ApplicationConfiguration applicationConfiguration = ApplicationManager.applicationConfiguration;
+
+            // Offline mode
+            if (applicationConfiguration.OfflineMode)
+            {
+                Debug.Log("Starting network manager in offline mode.");
+                NetworkUser networkUser;
+                networkUser.Identifier = 0;
+                networkUser.IsLocalUser = true;
+                AddNetworkUser(networkUser);
+                isConnected = true;
+                return;
+            }
+
+            // Handle procedure
+            Debug.Log($"Connecting using procedure: '{applicationConfiguration.connectionProcedure}'.");
+            switch (applicationConfiguration.connectionProcedure)
+            {
+                case ApplicationConfiguration.ConnectionProcedure.Manual:
+                    {
+                        serverAddress = applicationConfiguration.serverAddress;
+                        serverPort = applicationConfiguration.serverPort;
+                        break;
+                    }
+                default:
+                    {
+                        Debug.LogError("Unhandled connection procedure.");
+                        break;
+                    }
+            }
+
+            StartCoroutine(MaintainConnection());
         }
 
         public void Connect(string address, int port)
@@ -69,12 +107,6 @@ namespace PhenomenalViborg.MUCOSDK
         void Update()
         {
             m_Client.PollEvents();
-
-            var peer = m_Client.FirstPeer;
-            if (peer == null || peer.ConnectionState != ConnectionState.Connected)
-            {
-                m_Client.SendBroadcast(new byte[] { 1 }, 5000);
-            }
         }
 
         public void AddNetworkUser(NetworkUser networkUser)
@@ -100,6 +132,18 @@ namespace PhenomenalViborg.MUCOSDK
             Disconnect();
         }
 
+        private IEnumerator MaintainConnection()
+        {
+            while (true)
+            {
+                if (!isConnected)
+                {
+                    Connect(serverAddress, serverPort);
+                }
+
+                yield return new WaitForSeconds(1f);
+            }
+        }
 
         public NetworkUser GetLocalNetworkUser()
         {
@@ -175,11 +219,12 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError("Something very suspicious happended...");
             }
         }
+
         void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) { Debug.Log("OnPeerDisconnected"); }
 
         void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
         {
-            Debug.Log("[CLIENT] Error " + socketError);
+            Debug.Log("[Network error] Error: " + socketError);
         }
 
         void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
@@ -204,9 +249,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-        {
-        }
+        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) {}
 
         void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
 
