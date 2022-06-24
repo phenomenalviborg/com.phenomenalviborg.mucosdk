@@ -31,7 +31,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Start()
         {
-            Debug.Log("Initializing TrackingManager.");
+            Debug.Log("Initializing TrackingManager...");
 
             m_ApplicationConfiguration = ApplicationManager.applicationConfiguration;
 

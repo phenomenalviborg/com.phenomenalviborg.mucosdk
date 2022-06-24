@@ -58,7 +58,10 @@ namespace PhenomenalViborg.MUCOSDK
             base.Awake();
 
             Debug.Log("Initializing ApplicationManager...");
+        }
 
+        private void Start()
+        {
 #if UNITY_EDITOR
             Debug.Log("Trying to load active scene as experience.");
             ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations.Find(e => e.Scene.sceneIndex == EditorSceneManager.GetActiveScene().buildIndex);
@@ -100,6 +103,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         public IEnumerator LoadExperienceAsync(ExperienceConfiguration experienceConfiguration)
         {
+            Debug.Log($"Loading experience '{experienceConfiguration.Name}'...");
+
             AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.sceneIndex);
 
             // Wait until scene loading has completed
@@ -112,6 +117,9 @@ namespace PhenomenalViborg.MUCOSDK
             GameObject gameObject = new GameObject("MUCOExperience");
             ExperienceManager experienceManager = gameObject.AddComponent<ExperienceManager>();
             experienceManager.Initialize(experienceConfiguration);
+            DontDestroyOnLoad(experienceManager);
+
+            Debug.Log("Finished loading experience.");
         }
         #endregion
     }
