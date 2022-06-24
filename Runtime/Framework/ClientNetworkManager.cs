@@ -205,6 +205,12 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void SendPacket(MUCOPacket packet)
         {
+            if (!isConnected)
+            {
+                Debug.LogWarning("Failed to send packet, isConnected was false.");
+                return;
+            }
+
             m_DataWriter.Reset();
             m_DataWriter.Put(packet.ToArray(), 0, packet.GetSize());
             m_Server.Send(m_DataWriter, DeliveryMethod.Sequenced);

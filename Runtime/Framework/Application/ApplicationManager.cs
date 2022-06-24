@@ -47,7 +47,7 @@ namespace PhenomenalViborg.MUCOSDK
             managersGameObject.SetActive(false);
             applicationManager = managersGameObject.AddComponent<ApplicationManager>();
             threadManager = managersGameObject.AddComponent<MUCOThreadManager>();
-            trackingManager = managersGameObject.AddComponent<TrackingManager>();
+            //trackingManager = managersGameObject.AddComponent<TrackingManager>();
             clientNetworkManager = managersGameObject.AddComponent<ClientNetworkManager>();
             managersGameObject.SetActive(true);
             Debug.Log(applicationManager);
