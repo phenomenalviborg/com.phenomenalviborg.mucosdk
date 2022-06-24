@@ -10,6 +10,11 @@ namespace PhenomenalViborg.MUCOSDK
         private static readonly List<Action> executeCopiedOnMainThread = new List<Action>();
         private static bool actionToExecuteOnMainThread = false;
 
+        private void Awake()
+        {
+            Debug.Log("Initializing MUCOThreadManager...");
+        }
+
         private void Update()
         {
             UpdateMain();

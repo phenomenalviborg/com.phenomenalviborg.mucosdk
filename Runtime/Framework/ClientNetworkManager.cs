@@ -52,6 +52,8 @@ namespace PhenomenalViborg.MUCOSDK
         {
             base.Awake();
 
+            Debug.Log("Initializing ClientNetworkManager...");
+
             // Register packet handlers
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
@@ -253,7 +255,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) {}
+        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) { }
 
         void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
 

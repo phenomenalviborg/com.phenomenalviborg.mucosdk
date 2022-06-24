@@ -31,6 +31,8 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Start()
         {
+            Debug.Log("Initializing TrackingManager.");
+
             m_ApplicationConfiguration = ApplicationManager.applicationConfiguration;
 
             // Load device network library.

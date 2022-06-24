@@ -16,11 +16,13 @@ namespace PhenomenalViborg.MUCOSDK
         public static TrackingManager trackingManager { get; private set; } = null;
         public static ClientNetworkManager clientNetworkManager { get; private set; } = null;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void EntryPoint()
         {
+            Debug.Log("Initializing MUCOSDK...");
+
             // Load application configuration
-            ApplicationConfiguration applicationConfiguration = Resources.Load<ApplicationConfiguration>("ApplicationConfiguration");
+            applicationConfiguration = Resources.Load<ApplicationConfiguration>("ApplicationConfiguration");
             if (applicationConfiguration == null)
             {
                 Debug.LogError("Failed to find application configuration!");
@@ -29,6 +31,7 @@ namespace PhenomenalViborg.MUCOSDK
 
             if (applicationConfiguration.ManualInitialization)
             {
+                Debug.Log("Manual initialization is enabled, returning.");
                 return;
             }
 
@@ -40,14 +43,24 @@ namespace PhenomenalViborg.MUCOSDK
 
             // Initialize manager object
             GameObject managersGameObject = new GameObject("MUCOSDKManagers");
+            DontDestroyOnLoad(managersGameObject);
+            managersGameObject.SetActive(false);
             applicationManager = managersGameObject.AddComponent<ApplicationManager>();
             threadManager = managersGameObject.AddComponent<MUCOThreadManager>();
             trackingManager = managersGameObject.AddComponent<TrackingManager>();
             clientNetworkManager = managersGameObject.AddComponent<ClientNetworkManager>();
-            DontDestroyOnLoad(managersGameObject);
+            managersGameObject.SetActive(true);
+            Debug.Log(applicationManager);
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            Debug.Log("Initializing ApplicationManager...");
 
 #if UNITY_EDITOR
-            Debug.Log("EDITOR - Trying to load active scene as experience.");
+            Debug.Log("Trying to load active scene as experience.");
             ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations.Find(e => e.Scene.sceneIndex == EditorSceneManager.GetActiveScene().buildIndex);
             if (experienceConfiguration == null)
             {
