@@ -64,7 +64,7 @@ namespace PhenomenalViborg.MUCOSDK
             Object.DontDestroyOnLoad(managersGameObject);
             //s_ApplicationManager = managersGameObject.AddComponent<ApplicationManager>();
             s_ThreadManager = managersGameObject.AddComponent<MUCOThreadManager>();
-            s_TrackingManager = managersGameObject.AddComponent<TrackingManager>();
+            //s_TrackingManager = managersGameObject.AddComponent<TrackingManager>();
             s_ClientNetworkManager = managersGameObject.AddComponent<ClientNetworkManager>();
 
             // Spawn experience manager

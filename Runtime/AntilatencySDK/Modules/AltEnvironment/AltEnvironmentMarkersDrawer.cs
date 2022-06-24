@@ -85,7 +85,8 @@ namespace Antilatency.SDK {
             
             // Temporally disabled  
             /*if (nativeEnvironment.isMutable()) {
-                var mutableEnvironment = nativeEnvironment.QueryInterface<Antilatency.Alt.Tracking.IEnvironmentMutable>();
+                Antilatency.Alt.Tracking.IEnvironmentMutable mutableEnvironment;
+                nativeEnvironment.QueryInterface(out mutableEnvironment);
                 if (mutableEnvironment != null) {
                     var curUpdateId = mutableEnvironment.getUpdateId();
                     if (curUpdateId != _mutableEnvironmentUpdateId) {

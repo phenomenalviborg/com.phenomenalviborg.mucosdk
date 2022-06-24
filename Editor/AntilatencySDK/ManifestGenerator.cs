@@ -40,16 +40,10 @@ public class ManifestGenerator : MonoBehaviour {
             EditorUtility.DisplayDialog("Generate Android Manifest", "Failed to find default android manifest. Aborting.", "Ok");
             return;
         }
-        
-        // File.Copy(defaultAndroidManifestFilePath, tmpManifestFilePath);
-        // PatchAndroidManifest(tmpManifestFilePath, true);
-        // File.Move(tmpManifestFilePath, androidManifestFilePath);
-        
+
         File.Copy(defaultAndroidManifestFilePath, androidManifestFilePath);
         PatchAndroidManifest(androidManifestFilePath, true);
-        
-        GenerateUsbFilter();
-        
+
         AssetDatabase.Refresh();
     }
 
@@ -69,8 +63,6 @@ public class ManifestGenerator : MonoBehaviour {
         } else {
             PatchAndroidManifest(androidManifestFilePath, false);
         }
-        
-        GenerateUsbFilter();
     }
 
     private static void PatchAndroidManifest(string manifestPath, bool ignoreComments) {
@@ -123,7 +115,7 @@ public class ManifestGenerator : MonoBehaviour {
             "meta-data", 
             new Dictionary<string, string> {
                 ["name"] = "android.hardware.usb.action.USB_DEVICE_ATTACHED",
-                ["resource"] = "@xml/usb_filter"
+                ["resource"] = "@xml/antilatency_usb_filter"
             }
         );
 
@@ -186,35 +178,5 @@ public class ManifestGenerator : MonoBehaviour {
         foreach (var attribute in attributes) {
             targetNode.SetAttribute(attribute.Key, namespaceUri, attribute.Value);
         }
-    }
-
-    private static void GenerateUsbFilter() {
-        var androidXmlResPath = Path.Combine(Application.dataPath, "Plugins", "Android", "res", "xml");
-
-        if (!Directory.Exists(androidXmlResPath)) {
-            Directory.CreateDirectory(androidXmlResPath);
-        }
-        
-        var usbFilterFilePath = Path.Combine(androidXmlResPath, "usb_filter.xml");
-        var xDoc = new XmlDocument();
-
-        if (File.Exists(usbFilterFilePath)) {
-            xDoc.Load(usbFilterFilePath);
-        } else {
-            var docNode = xDoc.CreateXmlDeclaration("1.0", "utf-8", null);
-            xDoc.AppendChild(docNode);
-        }
-
-        AddNode(
-            xDoc,
-            null,
-            "resources",
-            "usb-device",
-            new Dictionary<string, string> {
-                ["vendor-id"] = "12855"
-            }
-        );
-        
-        xDoc.Save(usbFilterFilePath);
     }
 }

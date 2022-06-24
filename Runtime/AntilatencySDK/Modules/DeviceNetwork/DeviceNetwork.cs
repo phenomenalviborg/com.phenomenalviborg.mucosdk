@@ -87,7 +87,9 @@ namespace Antilatency.SDK {
                 return;
             }
 #if UNITY_ANDROID && !UNITY_EDITOR
-            var jni = _library.QueryInterface<AndroidJniWrapper.IAndroidJni>();
+            AndroidJniWrapper.IAndroidJni jni;
+            _library.QueryInterface(out jni);
+
             using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
                 using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity")) {
                     jni.initJni(IntPtr.Zero, activity.GetRawObject());
@@ -95,6 +97,7 @@ namespace Antilatency.SDK {
             }
             jni.Dispose();
 #endif
+            
             _library.setLogLevel(LogLevel.Info);
 
             var deviceFilter = _library.createFilter();
