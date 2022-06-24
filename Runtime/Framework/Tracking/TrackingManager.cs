@@ -31,7 +31,7 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Start()
         {
-            m_ApplicationConfiguration = MUCOApplication.GetApplicationConfiguration();
+            m_ApplicationConfiguration = ApplicationManager.applicationConfiguration;
 
             // Load device network library.
             m_DeviceNetworkLibrary = Antilatency.DeviceNetwork.Library.load();

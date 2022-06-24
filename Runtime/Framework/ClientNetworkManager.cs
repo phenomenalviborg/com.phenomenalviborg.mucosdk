@@ -104,32 +104,28 @@ namespace PhenomenalViborg.MUCOSDK
             m_Client.Connect(address, port, "MUCO");
         }
 
-        void Update()
-        {
-            m_Client.PollEvents();
-        }
-
-        public void AddNetworkUser(NetworkUser networkUser)
-        {
-            m_NetworkUsers.Add(networkUser);
-        }
-
-        void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
-        {
-            Debug.LogFormat(str, args);
-        }
-
         public void Disconnect()
         {
             NetDebug.Logger = null;
+            isConnected = false;
 
             m_Client.Stop();
+        }
+
+        void Update()
+        {
+            m_Client.PollEvents();
         }
 
         private void OnApplicationQuit()
         {
             // TODO: If connected
             Disconnect();
+        }
+
+        public void AddNetworkUser(NetworkUser networkUser)
+        {
+            m_NetworkUsers.Add(networkUser);
         }
 
         private IEnumerator MaintainConnection()
@@ -188,7 +184,6 @@ namespace PhenomenalViborg.MUCOSDK
                 SendPacket(unicastPacket);
             }
         }
-
         public void SendReplicatedMulticastPacket(MUCOPacket packet)
         {
             using (MUCOPacket multicastPacket = new MUCOPacket((System.UInt16)EPacketIdentifier.ClientGenericReplicatedMulticast))
@@ -206,9 +201,18 @@ namespace PhenomenalViborg.MUCOSDK
             m_Server.Send(m_DataWriter, DeliveryMethod.Sequenced);
         }
 
+        void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
+        {
+            Debug.LogFormat(str, args);
+        }
+
         void INetEventListener.OnPeerConnected(NetPeer peer)
         {
             Debug.Log($"OnPeerConnected {peer.EndPoint}");
+
+            // TODO: Look at this...
+
+            isConnected = true;
 
             if (m_Server == null)
             {
