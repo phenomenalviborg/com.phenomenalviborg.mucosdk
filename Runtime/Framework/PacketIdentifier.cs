@@ -24,9 +24,12 @@ namespace PhenomenalViborg.MUCOSDK
 
     public enum EPacketIdentifier : PacketIdentifier
     {
-        // MUCOSDK Client packet identiferis 10000-12000
+        // MUCOSDK Client packet identiferis 10000-11000
         ClientGenericReplicatedUnicast = 10000,
         ClientGenericReplicatedMulticast = 10001,
+
+        // MUCOSDK Datastore packet identiferis 11000-12000
+        DatastoreSet = 11001,
 
         // MUCOSDK Multicast packet identifers 12000-14000
         MulticastReplicateGenericVariable = 12000,
