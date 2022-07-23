@@ -51,6 +51,18 @@ namespace PhenomenalViborg.MUCOSDK
                 MulticastTransformHelper(headTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserHead);
                 MulticastTransformHelper(leftHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserLeftHand);
                 MulticastTransformHelper(rightHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRightHand);
+
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    Debug.Log("Test");
+                    PhenomenalViborg.Networking.Datastore.Set("test", (int)3);
+                }
+
+                if (Input.GetKey(KeyCode.Backspace))
+                {
+                    Debug.Log("Test2");
+                    Debug.Log(PhenomenalViborg.Networking.Datastore.Get<int>("test"));
+                }
             }
         }
 

@@ -56,6 +56,7 @@ namespace PhenomenalViborg.MUCOSDK
             // Register packet handlers
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
+            RegisterPacketHandler((System.UInt16)EPacketIdentifier.DatastoreSet, PhenomenalViborg.Networking.Datastore.HandleDatastoreSet);
 
             // Initialize from application configuration
             ApplicationConfiguration applicationConfiguration = ApplicationManager.applicationConfiguration;
