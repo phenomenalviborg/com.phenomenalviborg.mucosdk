@@ -22,8 +22,8 @@ namespace PhenomenalViborg.MUCOSDK
         private uint m_LastUpdateId = 0;
 
         private Antilatency.Alt.Tracking.ITrackingCotask m_UserTrackingCotask;
-        private Vector3 m_UserNodePosition = Vector3.zero;
-        private Quaternion m_UserNodeRotation = Quaternion.identity;
+        public Vector3 m_UserNodePosition = Vector3.zero;
+        public Quaternion m_UserNodeRotation = Quaternion.identity;
         private float m_UserTrackingExtrapolationTime = 0.0f;
         private UnityEngine.Pose m_TrackingPlacement;
 
@@ -31,7 +31,9 @@ namespace PhenomenalViborg.MUCOSDK
 
         private void Start()
         {
-            m_ApplicationConfiguration = MUCOApplication.GetApplicationConfiguration();
+            Debug.Log("Initializing TrackingManager...");
+
+            m_ApplicationConfiguration = ApplicationManager.applicationConfiguration;
 
             // Load device network library.
             m_DeviceNetworkLibrary = Antilatency.DeviceNetwork.Library.load();
@@ -185,8 +187,6 @@ namespace PhenomenalViborg.MUCOSDK
 
         #region Tracking
 
-        public Vector3 GetUserPosition() { return m_UserNodePosition; } // TMP
-        public Quaternion GetUserRotation() { return m_UserNodeRotation; } // TMP
 
         private void OnDeviceNetworkChanged()
         {

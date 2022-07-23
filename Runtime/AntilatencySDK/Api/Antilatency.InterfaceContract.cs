@@ -56,7 +56,17 @@ namespace Antilatency {
 }
 
 namespace Antilatency.InterfaceContract {
-    
+
+    [System.AttributeUsage(System.AttributeTargets.Interface)]
+    public class InterfaceIdAttribute : System.Attribute {
+        public System.Guid interfaceId;
+
+        public InterfaceIdAttribute(string interfaceId) {
+            this.interfaceId = System.Guid.Parse(interfaceId);
+        }
+    }
+
+
     public enum ExceptionCode : uint {
         Ok = 0,
         NotImplemented = 0x80004001,
@@ -143,12 +153,14 @@ namespace Antilatency.InterfaceContract {
     }
 
     [Guid("ffffffff-ffff-ffff-0C00-000000000064")]
+    [InterfaceId("ffffffff-ffff-ffff-0C00-000000000064")]
     public interface IUnsafe : IDisposable, IEquatable<object> {
         T QueryInterface<T>() where T : class, IUnsafe;
         ExceptionCode QueryInterface(ref Guid guid, out IntPtr result);
     }
 
     [Guid("00000000-0000-0000-C000-000000000046")]
+    [InterfaceId("00000000-0000-0000-C000-000000000046")]
     public interface IInterface : IUnsafe {
         uint AddRef();
         uint Release();
@@ -214,14 +226,20 @@ namespace Antilatency.InterfaceContract {
                     return null;
                 }
 
-                Guid guid = typeof(T).GUID;
-                IntPtr ptr = IntPtr.Zero;
-                QueryInterface(ref guid, out ptr);
-                if (ptr == IntPtr.Zero) {
+                var attributesEnumerable = typeof(T).GetCustomAttributes<Antilatency.InterfaceContract.InterfaceIdAttribute>(false);
+                var attributeEnumerator = attributesEnumerable.GetEnumerator();
+                if (attributeEnumerator.MoveNext()) {
+                    Guid guid = attributeEnumerator.Current.interfaceId;
+                    IntPtr ptr = IntPtr.Zero;
+                    QueryInterface(ref guid, out ptr);
+                    if (ptr == IntPtr.Zero) {
+                        return null;
+                    }
+
+                    return (T)Activator.CreateInstance(wrapperType, ptr);
+                } else {
                     return null;
                 }
-
-                return (T)Activator.CreateInstance(wrapperType, ptr);
             }
 
             public ExceptionCode QueryInterface(ref Guid guid, out IntPtr result) {
@@ -529,6 +547,7 @@ namespace Antilatency.InterfaceContract {
     }
 
     [Guid("97122ff5-ceaa-4c40-9627-12aab74a5daf")]
+    [InterfaceId("97122ff5-ceaa-4c40-9627-12aab74a5daf")]
     public interface IExceptionData : Antilatency.InterfaceContract.IUnsafe {
         string getMessage();
         void setMessage(string message);
@@ -769,14 +788,21 @@ namespace Antilatency.InterfaceContract {
                 throw new Exception("Failed to find wrapper for interface " + typeof(T).FullName);
             }
 
-            Guid guid = typeof(T).GUID;
-            IntPtr ptr = IntPtr.Zero;
-            QueryInterface(ref guid, out ptr);
-            if (ptr == IntPtr.Zero) {
+
+            var attributesEnumerable = typeof(T).GetCustomAttributes<Antilatency.InterfaceContract.InterfaceIdAttribute>(false);
+            var attributeEnumerator = attributesEnumerable.GetEnumerator();
+            if (attributeEnumerator.MoveNext()) {
+                Guid guid = attributeEnumerator.Current.interfaceId;
+                IntPtr ptr = IntPtr.Zero;
+                QueryInterface(ref guid, out ptr);
+                if (ptr == IntPtr.Zero) {
+                    return null;
+                }
+
+                return (T)Activator.CreateInstance(wrapperType, ptr);
+            } else {
                 return null;
             }
-
-            return (T)Activator.CreateInstance(wrapperType, ptr);
         }
 
         /// <summary>
@@ -791,12 +817,16 @@ namespace Antilatency.InterfaceContract {
                 throw new Exception("Failed to find wrapper for interface " + typeof(T).FullName);
             }
 
-            Guid guid = typeof(T).GUID;
-            IntPtr ptr = IntPtr.Zero;
+            var attributesEnumerable = typeof(T).GetCustomAttributes<Antilatency.InterfaceContract.InterfaceIdAttribute>(false);
+            var attributeEnumerator = attributesEnumerable.GetEnumerator();
+            if (attributeEnumerator.MoveNext()) {
+                Guid guid = attributeEnumerator.Current.interfaceId;
+                IntPtr ptr = IntPtr.Zero;
 
-			if(QueryLifetimeInterface(lifetimeId, ref guid, out ptr) == ExceptionCode.Ok) {
-				return (T)Activator.CreateInstance(wrapperType, ptr);
-			}
+                if (QueryLifetimeInterface(lifetimeId, ref guid, out ptr) == ExceptionCode.Ok) {
+                    return (T)Activator.CreateInstance(wrapperType, ptr);
+                }
+            }
 
             return null;
         }
@@ -841,6 +871,7 @@ namespace Antilatency.InterfaceContract {
     }
 
     [Guid("9154edf5-09e7-45a7-99d9-6380659fa6f2")]
+    [InterfaceId("9154edf5-09e7-45a7-99d9-6380659fa6f2")]
     public interface ILibraryUnloader : IInterface {
         void unloadLibrary();
     }

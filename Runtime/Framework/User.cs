@@ -47,25 +47,10 @@ namespace PhenomenalViborg.MUCOSDK
         {
             if (IsLocalUser)
             {
-                if (true)
-                {
-                    MulticastTransformHelper(transform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRoot);
-                }
-
-                if (true)
-                {
-                    MulticastTransformHelper(headTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserHead);
-                }
-
-                if (true)
-                {
-                    MulticastTransformHelper(leftHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserLeftHand);
-                }
-
-                if (true)
-                {
-                    MulticastTransformHelper(rightHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRightHand);
-                }
+                MulticastTransformHelper(transform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRoot);
+                MulticastTransformHelper(headTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserHead);
+                MulticastTransformHelper(leftHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserLeftHand);
+                MulticastTransformHelper(rightHandTransform, (System.UInt16)EUserPacketIdentifier.MulticastTransformUserRightHand);
             }
         }
 
@@ -74,13 +59,14 @@ namespace PhenomenalViborg.MUCOSDK
             int userID = packet.ReadInt();
             User user = s_Users[userID];
 
-            if (user)
+            if (user && !user.IsLocalUser)
             {
                 Vector3 position;
                 Quaternion rotation;
                 HandleMulticastTransformHelper(packet, out position, out rotation);
                 user.transform.position = position;
                 user.transform.rotation = rotation;
+                Debug.Log(rotation);
             }
         }
         private static void HandleMulticastTransformUserHead(MUCOPacket packet)
@@ -88,7 +74,7 @@ namespace PhenomenalViborg.MUCOSDK
             int userID = packet.ReadInt();
             User user = s_Users[userID];
 
-            if (user)
+            if (user && !user.IsLocalUser)
             {
                 Vector3 position;
                 Quaternion rotation;
@@ -102,7 +88,7 @@ namespace PhenomenalViborg.MUCOSDK
             int userID = packet.ReadInt();
             User user = s_Users[userID];
 
-            if (user)
+            if (user && !user.IsLocalUser)
             {
                 Vector3 position;
                 Quaternion rotation;
@@ -116,7 +102,7 @@ namespace PhenomenalViborg.MUCOSDK
             int userID = packet.ReadInt();
             User user = s_Users[userID];
 
-            if (user)
+            if (user && !user.IsLocalUser)
             {
                 Vector3 position;
                 Quaternion rotation;
@@ -134,9 +120,9 @@ namespace PhenomenalViborg.MUCOSDK
                 packet.WriteFloat(transform.position.x);
                 packet.WriteFloat(transform.position.y);
                 packet.WriteFloat(transform.position.z);
-                packet.WriteFloat(transform.rotation.x);
-                packet.WriteFloat(transform.rotation.y);
-                packet.WriteFloat(transform.rotation.z);
+                packet.WriteFloat(transform.eulerAngles.x);
+                packet.WriteFloat(transform.eulerAngles.y);
+                packet.WriteFloat(transform.eulerAngles.z);
 
                 ClientNetworkManager.GetInstance().SendReplicatedMulticastPacket(packet);
             }

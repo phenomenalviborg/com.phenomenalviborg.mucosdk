@@ -17,8 +17,7 @@ namespace PhenomenalViborg.MUCOSDK
 
     public class ClientNetworkManager : PhenomenalViborg.MUCOSDK.IManager<ClientNetworkManager>, INetLogger, INetEventListener
     {
-        private List<NetworkUser> m_NetworkUsers = new List<NetworkUser>();
-        public List<NetworkUser> NetworkUsers => m_NetworkUsers;
+        public List<NetworkUser> networkUsers { get; private set; } = new List<NetworkUser>();
 
         private NetworkUser m_LocalNetworkUser;
         public NetworkUser LocalNetworkUser => m_LocalNetworkUser;
@@ -27,9 +26,13 @@ namespace PhenomenalViborg.MUCOSDK
 
         public delegate void PacketHandler(MUCOPacket packet);
         public Dictionary<System.UInt16, PacketHandler> m_PacketHandlers = new Dictionary<System.UInt16, PacketHandler>();
-
+        
         private NetManager m_Client;
         private NetDataWriter m_DataWriter;
+
+        private string serverAddress;
+        private int serverPort;
+        private bool isConnected;
 
         public void RegisterPacketHandler(System.UInt16 packetIdentifier, PacketHandler packetHandler)
         {
@@ -44,13 +47,52 @@ namespace PhenomenalViborg.MUCOSDK
             m_PacketHandlers.Add(packetIdentifier, packetHandler);
         }
 
-
         protected override void Awake()
         {
             base.Awake();
 
+            Debug.Log("Initializing ClientNetworkManager...");
+
+            // Register packet handlers
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserConnected, HandleUserConnected);
             RegisterPacketHandler((System.UInt16)EPacketIdentifier.ServerUserDisconnected, HandleUserDisconnected);
+
+            // Initialize from application configuration
+            ApplicationConfiguration applicationConfiguration = ApplicationManager.applicationConfiguration;
+
+            // Add local user
+            NetworkUser networkUser;
+            networkUser.Identifier = -1;
+            networkUser.IsLocalUser = true;
+
+            AddNetworkUser(networkUser);
+
+            // Offline mode
+            if (applicationConfiguration.OfflineMode)
+            {
+                Debug.Log("Starting network manager in offline mode.");
+                isConnected = true;
+                return;
+            }
+
+            // Handle procedure
+            Debug.Log($"Connecting using procedure: '{applicationConfiguration.connectionProcedure}'.");
+            switch (applicationConfiguration.connectionProcedure)
+            {
+                case ApplicationConfiguration.ConnectionProcedure.Manual:
+                    {
+                        serverAddress = applicationConfiguration.serverAddress;
+                        serverPort = applicationConfiguration.serverPort;
+                        break;
+                    }
+                default:
+                    {
+                        Debug.LogError("Unhandled connection procedure.");
+                        break;
+                    }
+            }
+
+            StartCoroutine(MaintainConnection());
         }
 
         public void Connect(string address, int port)
@@ -66,32 +108,17 @@ namespace PhenomenalViborg.MUCOSDK
             m_Client.Connect(address, port, "MUCO");
         }
 
-        void Update()
-        {
-            m_Client.PollEvents();
-
-            var peer = m_Client.FirstPeer;
-            if (peer == null || peer.ConnectionState != ConnectionState.Connected)
-            {
-                m_Client.SendBroadcast(new byte[] { 1 }, 5000);
-            }
-        }
-
-        public void AddNetworkUser(NetworkUser networkUser)
-        {
-            m_NetworkUsers.Add(networkUser);
-        }
-
-        void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
-        {
-            Debug.LogFormat(str, args);
-        }
-
         public void Disconnect()
         {
             NetDebug.Logger = null;
+            isConnected = false;
 
             m_Client.Stop();
+        }
+
+        void Update()
+        {
+            m_Client.PollEvents();
         }
 
         private void OnApplicationQuit()
@@ -100,6 +127,23 @@ namespace PhenomenalViborg.MUCOSDK
             Disconnect();
         }
 
+        public void AddNetworkUser(NetworkUser networkUser)
+        {
+            networkUsers.Add(networkUser);
+        }
+
+        private IEnumerator MaintainConnection()
+        {
+            while (true)
+            {
+                if (!isConnected)
+                {
+                    Connect(serverAddress, serverPort);
+                }
+
+                yield return new WaitForSeconds(1f);
+            }
+        }
 
         public NetworkUser GetLocalNetworkUser()
         {
@@ -114,23 +158,28 @@ namespace PhenomenalViborg.MUCOSDK
 
             if (networkUser.IsLocalUser)
             {
-                m_LocalNetworkUser = networkUser;
+                Debug.Log($"User Connected(self): {networkUser.Identifier}");
+                networkUsers[0] = networkUser;
+            }
+            else
+            {
+                Debug.Log($"User Connected: {networkUser.Identifier}");
+                networkUsers.Add(networkUser);
             }
 
-            Debug.Log($"User Connected: {networkUser.Identifier}");
-            m_NetworkUsers.Add(networkUser);
-            ExperienceManager.GetInstance().SpawnUser(networkUser);
+            ExperienceManager.GetInstance().OnUserConnected(networkUser);
         }
         private void HandleUserDisconnected(MUCOPacket packet)
         {
             int userIdentifier = packet.ReadInt();
             Debug.Log($"User Disconnected: {userIdentifier}");
 
-            NetworkUser? networkUser = m_NetworkUsers.Find(user => user.Identifier == userIdentifier);
+            NetworkUser? networkUser = networkUsers.Find(user => user.Identifier == userIdentifier);
             if (networkUser != null)
             {
-                m_NetworkUsers.Remove((NetworkUser)networkUser);
-                ExperienceManager.GetInstance().RemoveUser((NetworkUser)networkUser);
+                networkUsers.Remove((NetworkUser)networkUser);
+                
+                ExperienceManager.GetInstance().OnUserDisconnected((NetworkUser)networkUser);
             }
         }
 
@@ -144,7 +193,6 @@ namespace PhenomenalViborg.MUCOSDK
                 SendPacket(unicastPacket);
             }
         }
-
         public void SendReplicatedMulticastPacket(MUCOPacket packet)
         {
             using (MUCOPacket multicastPacket = new MUCOPacket((System.UInt16)EPacketIdentifier.ClientGenericReplicatedMulticast))
@@ -157,14 +205,29 @@ namespace PhenomenalViborg.MUCOSDK
 
         public void SendPacket(MUCOPacket packet)
         {
+            if (!isConnected)
+            {
+                Debug.LogWarning("Failed to send packet, isConnected was false.");
+                return;
+            }
+
             m_DataWriter.Reset();
             m_DataWriter.Put(packet.ToArray(), 0, packet.GetSize());
             m_Server.Send(m_DataWriter, DeliveryMethod.Sequenced);
         }
 
+        void INetLogger.WriteNet(NetLogLevel level, string str, params object[] args)
+        {
+            Debug.LogFormat(str, args);
+        }
+
         void INetEventListener.OnPeerConnected(NetPeer peer)
         {
             Debug.Log($"OnPeerConnected {peer.EndPoint}");
+
+            // TODO: Look at this...
+
+            isConnected = true;
 
             if (m_Server == null)
             {
@@ -175,11 +238,12 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError("Something very suspicious happended...");
             }
         }
+
         void INetEventListener.OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) { Debug.Log("OnPeerDisconnected"); }
 
         void INetEventListener.OnNetworkError(IPEndPoint endPoint, SocketError socketError)
         {
-            Debug.Log("[CLIENT] Error " + socketError);
+            Debug.Log("[Network error] Error: " + socketError);
         }
 
         void INetEventListener.OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
@@ -204,9 +268,7 @@ namespace PhenomenalViborg.MUCOSDK
             }
         }
 
-        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-        {
-        }
+        void INetEventListener.OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) { }
 
         void INetEventListener.OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
 

@@ -5,7 +5,8 @@
     "autoReferenced": true,
     "references": [
         "PhenomenalViborg.MUCONet",
-        "Antilatency.SDK"
+        "Antilatency.SDK",
+        "UnityEngine.SpatialTracking"
     ],
     "includePlatforms": [
         "Editor",

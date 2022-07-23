@@ -78,9 +78,11 @@ namespace Antilatency.SDK {
                 Debug.LogError("Failed to load AltSystemClient library");
                 return null;
             }
-
+            
 #if UNITY_ANDROID && !UNITY_EDITOR
-            var jni = library.QueryInterface<AndroidJniWrapper.IAndroidJni>();
+            AndroidJniWrapper.IAndroidJni jni;
+            library.QueryInterface(out jni);
+
             using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
                 using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity")) {
                     jni.initJni(IntPtr.Zero, activity.GetRawObject());

@@ -12,32 +12,31 @@
 #pragma warning disable IDE0017 // Do not suggest to simplify object initialization
 using System.Runtime.InteropServices; //GuidAttribute
 namespace Antilatency.RadioMetrics.Interop {
-
-/// <summary>Extended metrics.</summary>
-[System.Serializable]
-[System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-public partial struct ExtendedMetrics {
-	/// <summary>Count of bytes, that was sent to targetNode.</summary>
-	public uint txBytes;
-	/// <summary>Count of packet, that was sent to targetNode.</summary>
-	public uint txPacketsCount;
-	/// <summary>Count of bytes, that was received from targetNode.</summary>
-	public uint rxBytes;
-	/// <summary>Count of packets, that was received from targetNode.</summary>
-	public uint rxPacketsCount;
-	/// <summary>Count of special empty packets. Should be 0. Indicator of problem with usb.</summary>
-	public uint flowCount;
-	/// <summary>Average rssi value in dBm.</summary>
-	public sbyte averageRssi;
-	/// <summary>Min rssi value in dBm.(worse)</summary>
-	public sbyte minRssi;
-	/// <summary>Max rssi value in dBm.(best)</summary>
-	public sbyte maxRssi;
-	/// <summary>Count of packets that wasn't receive.</summary>
-	public uint missedPacketsCount;
-	/// <summary>Count of packets with error.</summary>
-	public uint failedPacketsCount;
+	/// <summary>Extended metrics.</summary>
+	[System.Serializable]
+	[System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
+	public partial struct ExtendedMetrics {
+		/// <summary>Count of bytes, that was sent to targetNode.</summary>
+		public uint txBytes;
+		/// <summary>Count of packet, that was sent to targetNode.</summary>
+		public uint txPacketsCount;
+		/// <summary>Count of bytes, that was received from targetNode.</summary>
+		public uint rxBytes;
+		/// <summary>Count of packets, that was received from targetNode.</summary>
+		public uint rxPacketsCount;
+		/// <summary>Count of special empty packets. Should be 0. Indicator of problem with usb.</summary>
+		public uint flowCount;
+		/// <summary>Average rssi value in dBm.</summary>
+		public sbyte averageRssi;
+		/// <summary>Min rssi value in dBm.(worse)</summary>
+		public sbyte minRssi;
+		/// <summary>Max rssi value in dBm.(best)</summary>
+		public sbyte maxRssi;
+		/// <summary>Count of packets that wasn't receive.</summary>
+		public uint missedPacketsCount;
+		/// <summary>Count of packets with error.</summary>
+		public uint failedPacketsCount;
+	}
 }
 
 
-}

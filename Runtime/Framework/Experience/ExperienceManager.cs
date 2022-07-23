@@ -15,14 +15,24 @@ namespace PhenomenalViborg.MUCOSDK
         {
             m_ExperienceConfiguration = experienceConfiguration;
 
-            /*// Spawn connected users
-            foreach (NetworkUser networkUser in ClientNetworkManager.GetInstance().GetNetworkUsers())
+            // Spawn connected users
+            foreach (NetworkUser networkUser in ClientNetworkManager.GetInstance().networkUsers)
             {
                 SpawnUser(networkUser);
-            }*/
+            }
         }
 
-        public void SpawnUser(NetworkUser networkUser)
+        public void OnUserConnected(NetworkUser networkUser)
+        {
+            SpawnUser(networkUser);
+        }
+
+        public void OnUserDisconnected(NetworkUser networkUser)
+        {
+            RemoveUser(networkUser);
+        }
+
+        private void SpawnUser(NetworkUser networkUser)
         {
             if (m_UserGameObjects.ContainsKey(networkUser))
             {
@@ -39,7 +49,7 @@ namespace PhenomenalViborg.MUCOSDK
             m_UserGameObjects[networkUser] = userGameObject;
         }
 
-        public void RemoveUser(NetworkUser networkUser)
+        private void RemoveUser(NetworkUser networkUser)
         {
             GameObject userGameObject = m_UserGameObjects[networkUser];
             if (userGameObject == null)
