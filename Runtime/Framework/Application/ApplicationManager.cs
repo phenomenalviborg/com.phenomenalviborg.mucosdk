@@ -47,35 +47,42 @@ namespace PhenomenalViborg.MUCOSDK
             // Initialize manager object
             GameObject managersGameObject = new GameObject("MUCOSDKManagers");
             DontDestroyOnLoad(managersGameObject);
-            managersGameObject.SetActive(false);
             applicationManager = managersGameObject.AddComponent<ApplicationManager>();
             threadManager = managersGameObject.AddComponent<MUCOThreadManager>();
             clientNetworkManager = managersGameObject.AddComponent<ClientNetworkManager>();
-            managersGameObject.SetActive(true);
-        }
 
-        protected override void Awake()
-        {
-            base.Awake();
+            applicationManager.Initialized();
+            threadManager.Initialized();
+            clientNetworkManager.Initialized();
 
-            Debug.Log("Initializing ApplicationManager...");
-        }
+            Debug.Log("Entry point end");
 
-        private void Start()
-        {
+            // Load experience
 #if UNITY_EDITOR
-            ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations.Find(e => e.Scene.sceneIndex == EditorSceneManager.GetActiveScene().buildIndex);
+            /*ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations.Find(e => e.Scene.sceneIndex == EditorSceneManager.GetActiveScene().buildIndex);
+            if (experienceConfiguration == null)
+            {
+                Debug.LogError("Failed to find active scene in the registered expereience configurations.");
+                return;
+            }*/
+#else
+#endif
+
+            ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations[0];
             if (experienceConfiguration == null)
             {
                 Debug.LogError("Failed to find active scene in the registered expereience configurations.");
                 return;
             }
-#else
-            ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations[0]; 
-#endif
 
             Debug.Log($"Trying to load active scene as experience. {experienceConfiguration.name}");
             applicationManager.LoadExperienceByConfiguration(experienceConfiguration);
+
+        }
+
+        public void Initialized()
+        {
+            Debug.Log("Initializing ApplicationManager...");
         }
 
         #region Experience loading
@@ -90,7 +97,6 @@ namespace PhenomenalViborg.MUCOSDK
 
             LoadExperienceByConfiguration(experienceConfiguration);
         }
-
 
         public void LoadExperienceByConfiguration(ExperienceConfiguration experienceConfiguration)
         {

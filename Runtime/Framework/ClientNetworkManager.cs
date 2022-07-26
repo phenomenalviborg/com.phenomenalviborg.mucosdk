@@ -47,10 +47,8 @@ namespace PhenomenalViborg.MUCOSDK
             m_PacketHandlers.Add(packetIdentifier, packetHandler);
         }
 
-        protected override void Awake()
+        public void Initialized()
         {
-            base.Awake();
-
             Debug.Log("Initializing ClientNetworkManager...");
 
             // Register packet handlers
