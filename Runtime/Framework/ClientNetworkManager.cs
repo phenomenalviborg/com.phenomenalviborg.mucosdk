@@ -72,7 +72,6 @@ namespace PhenomenalViborg.MUCOSDK
             if (applicationConfiguration.OfflineMode)
             {
                 Debug.Log("Starting network manager in offline mode.");
-                isConnected = true;
                 return;
             }
 
@@ -114,12 +113,18 @@ namespace PhenomenalViborg.MUCOSDK
             NetDebug.Logger = null;
             isConnected = false;
 
-            m_Client.Stop();
+            if (isConnected)
+            {
+                m_Client.Stop();
+            }
         }
 
         void Update()
         {
-            m_Client.PollEvents();
+            if (isConnected)
+            {
+                m_Client.PollEvents();
+            }
         }
 
         private void OnApplicationQuit()
@@ -208,7 +213,6 @@ namespace PhenomenalViborg.MUCOSDK
         {
             if (!isConnected)
             {
-                Debug.LogWarning("Failed to send packet, isConnected was false.");
                 return;
             }
 

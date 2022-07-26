@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
 using UnityEditor.SceneManagement;
+#endif
 
 namespace PhenomenalViborg.MUCOSDK
 {
@@ -47,10 +50,8 @@ namespace PhenomenalViborg.MUCOSDK
             managersGameObject.SetActive(false);
             applicationManager = managersGameObject.AddComponent<ApplicationManager>();
             threadManager = managersGameObject.AddComponent<MUCOThreadManager>();
-            //trackingManager = managersGameObject.AddComponent<TrackingManager>();
             clientNetworkManager = managersGameObject.AddComponent<ClientNetworkManager>();
             managersGameObject.SetActive(true);
-            Debug.Log(applicationManager);
         }
 
         protected override void Awake()
@@ -70,9 +71,10 @@ namespace PhenomenalViborg.MUCOSDK
                 Debug.LogError("Failed to find active scene in the registered expereience configurations.");
                 return;
             }
-
-            applicationManager.LoadExperienceByConfiguration(experienceConfiguration);
+#else
+            ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations[0]; 
 #endif
+            applicationManager.LoadExperienceByConfiguration(experienceConfiguration);
         }
 
         #region Experience loading
@@ -105,13 +107,17 @@ namespace PhenomenalViborg.MUCOSDK
         {
             Debug.Log($"Loading experience '{experienceConfiguration.Name}'...");
 
-            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.sceneIndex);
+            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(0);
+            loadSceneAsync.allowSceneActivation = true;
 
             // Wait until scene loading has completed
             while (!loadSceneAsync.isDone)
             {
+                Debug.Log($"Loading scene... {loadSceneAsync.progress*100}%");
                 yield return null;
             }
+
+            Debug.Log("Finished loading scene.");
 
             // Initialize ExperienceManager
             GameObject gameObject = new GameObject("MUCOExperience");
