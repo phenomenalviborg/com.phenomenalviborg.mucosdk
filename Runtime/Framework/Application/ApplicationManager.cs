@@ -64,7 +64,6 @@ namespace PhenomenalViborg.MUCOSDK
         private void Start()
         {
 #if UNITY_EDITOR
-            Debug.Log("Trying to load active scene as experience.");
             ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations.Find(e => e.Scene.sceneIndex == EditorSceneManager.GetActiveScene().buildIndex);
             if (experienceConfiguration == null)
             {
@@ -74,6 +73,8 @@ namespace PhenomenalViborg.MUCOSDK
 #else
             ExperienceConfiguration experienceConfiguration = applicationConfiguration.ExperienceConfigurations[0]; 
 #endif
+
+            Debug.Log($"Trying to load active scene as experience. {experienceConfiguration.name}");
             applicationManager.LoadExperienceByConfiguration(experienceConfiguration);
         }
 
