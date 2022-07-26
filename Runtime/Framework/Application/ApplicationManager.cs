@@ -107,13 +107,13 @@ namespace PhenomenalViborg.MUCOSDK
         {
             Debug.Log($"Loading experience '{experienceConfiguration.Name}'...");
 
-            AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync(0);
-            loadSceneAsync.allowSceneActivation = true;
+            AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(experienceConfiguration.Scene.sceneIndex);
+            asyncOperation.allowSceneActivation = true;
 
             // Wait until scene loading has completed
-            while (!loadSceneAsync.isDone)
+            while (!asyncOperation.isDone)
             {
-                Debug.Log($"Loading scene... {loadSceneAsync.progress*100}%");
+                Debug.Log($"Loading scene... {asyncOperation.progress * 100}%");
                 yield return null;
             }
 
