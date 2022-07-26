@@ -19,9 +19,20 @@ namespace PhenomenalViborg.MUCOSDK
         public static TrackingManager trackingManager { get; private set; } = null;
         public static ClientNetworkManager clientNetworkManager { get; private set; } = null;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        public static bool initialized = false;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void EntryPoint()
         {
+            if (initialized)
+            {
+                return;
+            }
+            else
+            {
+                initialized = true;
+            }
+
             Debug.Log("Initializing MUCOSDK...");
 
             // Load application configuration
